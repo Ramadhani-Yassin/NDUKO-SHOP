@@ -91,5 +91,5 @@ This project is licensed under the [MIT License](LICENSE).
 **Resilient Matrix Technologies (RM TECH)**  
 📍 **Empowering Businesses with Smart Tech & Financial Solutions | EST. 29 Nov 2022**  
 
-> Find me on [GitHub](https://github.com/Ramadhani-Yassin) | [LinkedIn](https://www.linkedin.com/in/ramadhani-yassin-ramadhani/)  
+> Find me on [GitHub](https://github.com/Ramadhani-Yassin) | [LinkedIn](https://www.linkedin.com/in/ramadhani-yassin-ramadhani/) | [Email](mailto:yasynramah@gmail.com) | [Instagram](https://www.instagram.com/rm_tech.tz/) 
 
