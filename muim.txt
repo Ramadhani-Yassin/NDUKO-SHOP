@@ -1,0 +1,67 @@
+php artisan serve --hostt=IP --port=8000
+
+npm run dev 
+npm run build
+
+https://github.com/mamun724682/Inventory-Management-System-Laravel-SPA
+
+
+
+
+
+✅ Steps Taken to Fix nduko.shop Not Opening on Phone
+1️⃣ Checked PC's Local IP Address
+Ran ipconfig on PC to find the IPv4 Address (e.g., 192.168.43.100).
+Tried accessing http://192.168.43.100:8000 on the phone browser (PC is connected via phone hotspot).
+2️⃣ Allowed Laravel to Accept External Requests
+Stopped any running Laravel server (Ctrl + C).
+Restarted Laravel using:
+sh
+
+
+
+php artisan serve --host=0.0.0.0 --port=8000
+Confirmed that http://192.168.43.100:8000 works on both PC and phone.
+3️⃣ Set Up Apache Virtual Host for nduko.shop
+Edited C:\xampp\apache\conf\extra\httpd-vhosts.conf to point to Laravel's public folder:
+apache
+
+<VirtualHost *:80>
+    ServerAdmin admin@nduko.shop
+    DocumentRoot "C:/Users/RM/Music/NDUKO/public"
+    ServerName nduko.shop
+    <Directory "C:/Users/RM/Music/NDUKO/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+Restarted Apache in XAMPP Control Panel.
+4️⃣ Updated hosts File for DNS Resolution
+Edited C:\Windows\System32\drivers\etc\hosts to add:
+
+
+192.168.43.100  nduko.shop
+
+This ensures PC recognizes nduko.shop locally.
+5️⃣ Allowed Phone to Recognize nduko.shop
+Installed DNS Changer App on Android.
+Added Custom DNS Entry:
+
+192.168.43.100  nduko.shop
+
+Restarted phone browser and tested http://nduko.shop.
+
+6️⃣ Disabled Windows Firewall for Testing
+Temporarily turned off Private Network firewall in Windows Security.
+Verified that the phone could now access the Laravel project.
+
+🚀 Final Status
+✔ http://nduko.shop works on PC.
+✔ http://nduko.shop works on the phone (after setting DNS).
+✔ Laravel is accessible externally on the same Wi-Fi/hotspot network.
+
+💡 Next Steps (Optional)
+If you want a permanent fix, use a real domain & deploy on a live server instead of XAMPP.
+If the issue persists, check router settings (some networks block local DNS overrides).
+Let me know if you need more help! 🚀
