@@ -1,0 +1,19 @@
+# Laravel backend files (not needed for frontend)
+app/
+bootstrap/
+config/
+database/
+routes/
+storage/
+tests/
+vendor/
+artisan
+composer.json
+composer.lock
+phpunit.xml
+.env
+.env.example
+.env.production
+railway.json
+Procfile
+nixpacks.toml

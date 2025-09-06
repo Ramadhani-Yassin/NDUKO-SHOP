@@ -1,14 +1,21 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "public/**",
-      "use": "@vercel/static"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/$1"
     }
-  ]
+  ],
+  "env": {
+    "VITE_APP_URL": "@vite_app_url"
+  }
 }
