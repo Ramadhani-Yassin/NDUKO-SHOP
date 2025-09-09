@@ -130,13 +130,13 @@ const createProduct = () => {
                                 <InputError :message="form.errors.product_code"/>
                             </div>
                             <div class="flex flex-col">
-                                <label for="root" class="text-stone-600 text-sm font-medium">Root</label>
+                                <label for="root" class="text-stone-600 text-sm font-medium">Supplier Location</label>
                                 <input
                                     id="root"
                                     v-model="form.root"
                                     @keyup.enter="createProduct"
                                     type="text"
-                                    placeholder="Enter root"
+                                    placeholder="Supplier Location"
                                     class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                                 />
                                 <InputError :message="form.errors.root"/>

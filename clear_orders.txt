@@ -1,0 +1,12 @@
+START TRANSACTION;
+
+-- Delete order items first due to FK to orders
+DELETE FROM `order_items`;
+
+-- Delete transactions (FK to orders with ON DELETE CASCADE, but delete explicitly)
+DELETE FROM `transactions`;
+
+-- Delete orders
+DELETE FROM `orders`;
+
+COMMIT;
