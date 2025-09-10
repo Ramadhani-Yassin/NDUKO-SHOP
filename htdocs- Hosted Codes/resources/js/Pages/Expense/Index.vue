@@ -75,7 +75,7 @@ const updateExpense = () => {
 };
 
 const deleteExpense = () => {
-    form.delete(route('expenses.destroy', selectedExpense.value.id), {
+    form.post(route('expenses.destroy', selectedExpense.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();

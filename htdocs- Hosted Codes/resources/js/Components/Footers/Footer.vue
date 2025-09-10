@@ -24,7 +24,7 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl font-semibold">Let's keep in touch!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Need Similar System For Your Shop...? Consult 📧 Me ASAP 😊
+                        Need Similar System For Your Shop...? Consult 📧 Me via Email: yasynramah@gmail.com
                     </h5>
                     <div class="mt-6 lg:mb-0 mb-6">
 <!--                        <button-->

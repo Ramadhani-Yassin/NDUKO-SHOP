@@ -60,12 +60,23 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('expenses', ExpenseController::class);
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('employees', EmployeeController::class);
+    // Safe delete routes using POST to avoid DELETE on hosting
+    Route::post('unit-types/{unit_type}/delete', [UnitTypeController::class, 'destroy'])->name('unit-types.destroy');
+    Route::post('suppliers/{supplier}/delete', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    Route::post('products/{product}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::post('expenses/{expense}/delete', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+    Route::post('employees/{employee}/delete', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::post('customers/{customer}/delete', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
     Route::apiResource('salaries', SalaryController::class);
 
     // Order
     Route::apiResource('orders', OrderController::class);
     Route::put('orders/{order}/settle', [OrderController::class, 'settle'])->name('orders.settle');
     Route::put('orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+    // Safe POST fallbacks for hosting
+    Route::post('orders/{order}/settle', [OrderController::class, 'settle'])->name('orders.settle');
+    Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
 
     // Transaction
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -73,11 +84,11 @@ Route::middleware('auth')->group(function () {
     // Carts
     Route::get('pos', [CartController::class, 'index'])->name('carts.index');
     Route::post('carts/{productId}', [CartController::class, 'addToCart'])->name('carts.store');
-    Route::put('carts/{cart}', [CartController::class, 'updateQuantity'])->name('carts.update');
+    Route::post('carts/{cart}', [CartController::class, 'updateQuantity'])->name('carts.update');
+    Route::post('carts/{cart}/increment', [CartController::class, 'incrementQuantity'])->name('carts.increment');
+    Route::post('carts/{cart}/decrement', [CartController::class, 'decrementQuantity'])->name('carts.decrement');
     Route::post('carts/{cart}/delete', [CartController::class, 'delete'])->name('carts.delete');
     Route::post('carts/delete/all', [CartController::class, 'deleteForUser'])->name('carts.delete.all');
-    Route::put('carts/{cart}/increment', [CartController::class, 'incrementQuantity'])->name('carts.increment');
-    Route::put('carts/{cart}/decrement', [CartController::class, 'decrementQuantity'])->name('carts.decrement');
 
     // Settings
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');

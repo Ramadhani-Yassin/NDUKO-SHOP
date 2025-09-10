@@ -70,10 +70,13 @@ class ProductService
      */
     public function create(array $payload): mixed
     {
-        $photo = $this->fileManagerService->uploadFile(
-            file: $payload['photo'],
-            uploadPath: Product::PHOTO_PATH
-        );
+        $photo = null;
+        if (isset($payload['photo']) && $payload['photo']) {
+            $photo = $this->fileManagerService->uploadFile(
+                file: $payload['photo'],
+                uploadPath: Product::PHOTO_PATH
+            );
+        }
 
         $processPayload = [
             ProductFieldsEnum::CATEGORY_ID->value    => $payload[ProductFieldsEnum::CATEGORY_ID->value],
@@ -81,8 +84,8 @@ class ProductService
             ProductFieldsEnum::NAME->value           => $payload[ProductFieldsEnum::NAME->value],
             ProductFieldsEnum::DESCRIPTION->value    => $payload[ProductFieldsEnum::DESCRIPTION->value],
             ProductFieldsEnum::PRODUCT_NUMBER->value => 'P-' . Str::random(5),
-            ProductFieldsEnum::PRODUCT_CODE->value   => $payload[ProductFieldsEnum::PRODUCT_CODE->value],
-            ProductFieldsEnum::ROOT->value           => $payload[ProductFieldsEnum::ROOT->value],
+            ProductFieldsEnum::PRODUCT_CODE->value   => $payload[ProductFieldsEnum::PRODUCT_CODE->value] ?? null,
+            ProductFieldsEnum::ROOT->value           => $payload[ProductFieldsEnum::ROOT->value] ?? null,
             ProductFieldsEnum::BUYING_PRICE->value   => $payload[ProductFieldsEnum::BUYING_PRICE->value],
             ProductFieldsEnum::SELLING_PRICE->value  => $payload[ProductFieldsEnum::SELLING_PRICE->value],
             ProductFieldsEnum::BUYING_DATE->value    => $payload[ProductFieldsEnum::BUYING_DATE->value],

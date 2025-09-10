@@ -45,7 +45,7 @@ const payDueOrderModal = (order) => {
     showPaymentModal.value = true;
 };
 const payOrderDue = () => {
-    form.put(route('orders.pay', selectedOrder.value.id), {
+    form.post(route('orders.pay', selectedOrder.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -59,7 +59,7 @@ const settleOrderModal = (order) => {
     showSettleModal.value = true;
 };
 const settleDuePayment = () => {
-    form.put(route('orders.settle', selectedOrder.value.id), {
+    form.post(route('orders.settle', selectedOrder.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -187,11 +187,14 @@ const closeModal = () => {
 
                         <tr v-for="(orderItem, index) in selectedOrder.order_items" :key="orderItem.id">
                             <TableData class="text-left flex items-center" :title="orderItem.product_json.name">
+                                <!-- Product image not necessary; commented out. -->
+                                <!--
                                 <img
                                     :src="orderItem.product_json.photo"
                                     class="h-12 w-12 bg-white rounded-full border"
                                     alt="Inventory management system"
                                 />
+                                -->
                                 <span class="ml-3 font-bold text-blueGray-600">{{ truncateString(orderItem.product_json.name, 15) }}</span>
                             </TableData>
                             <TableData>{{ orderItem.product_json.product_number }}</TableData>

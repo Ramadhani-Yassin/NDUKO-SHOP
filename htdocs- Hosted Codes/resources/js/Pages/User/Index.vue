@@ -45,11 +45,14 @@ const tableHeads = ref(['#', "Name", "Email", "Email Verified At"]);
                             {{ (users.current_page * users.per_page) - (users.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center" :title="user.name">
+                            <!-- Photo not necessary; commented out. -->
+                            <!--
                             <img
                                 :src="user.photo"
                                 class="h-12 w-12 bg-white rounded-full border"
                                 alt="Inventory management system"
                             />
+                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ truncateString(user.name, 20) }}</span>
                         </TableData>
                         <TableData>{{ user.email }}</TableData>

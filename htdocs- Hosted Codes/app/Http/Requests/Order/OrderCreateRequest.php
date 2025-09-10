@@ -40,4 +40,20 @@ class OrderCreateRequest extends FormRequest
             "custom_discount.discount_type"     => ["required_with:custom_discount", "string", Rule::in(AmountTypeEnum::values())],
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $paidThrough = $this->input('paid_through');
+            if ($paidThrough === TransactionPaidThroughEnum::LOAN->value) {
+                if (!$this->input(OrderFieldsEnum::CUSTOMER_ID->value)) {
+                    $validator->errors()->add(OrderFieldsEnum::CUSTOMER_ID->value, 'Customer is required for loan sales.');
+                }
+                // Normalize paid to 0 on loan
+                $this->merge([
+                    OrderFieldsEnum::PAID->value => 0
+                ]);
+            }
+        });
+    }
 }

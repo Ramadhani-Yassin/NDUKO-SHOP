@@ -154,23 +154,34 @@ class OrderService
             $total = $cartSubtotal - $discountTotal;
             $totalWithTax = $total + $taxTotal;
 
-            // Calculate due
-            $paid = $payload[OrderFieldsEnum::PAID->value] ?? 0;
-            $due = $total - $paid;
+            // Detect LOAN
+            $paidThrough = $payload[TransactionFieldsEnum::PAID_THROUGH->value] ?? null;
+            $isLoan = $paidThrough === \App\Enums\Transaction\TransactionPaidThroughEnum::LOAN->value;
+
+            // Calculate due and paid
+            $paidInput = $payload[OrderFieldsEnum::PAID->value] ?? 0;
+            $paid = $isLoan ? 0 : $paidInput;
             $dueWithTax = $totalWithTax - $paid;
 
             // Calculate profit and loss
-            [$profit, $loss] = $this->decideProfitLoss(
-                paid: $paid,
-                taxTotal: $taxTotal,
-                productBuyingSubtotal: $productBuyingSubtotal,
-            );
+            [$profit, $loss] = $isLoan
+                ? [0, 0]
+                : $this->decideProfitLoss(
+                    paid: $paid,
+                    taxTotal: $taxTotal,
+                    productBuyingSubtotal: $productBuyingSubtotal,
+                );
 
             // Decide status
             $status = $this->decideStatus(
                 paid: $paid,
                 total: $totalWithTax
             );
+
+            // Enforce customer on loan
+            if ($isLoan && empty($payload[OrderFieldsEnum::CUSTOMER_ID->value])) {
+                throw new OrderCreateException('Customer is required for loan sales.');
+            }
 
             $processPayload = [
                 OrderFieldsEnum::CUSTOMER_ID->value    => $payload[OrderFieldsEnum::CUSTOMER_ID->value] ?? null,
@@ -195,11 +206,11 @@ class OrderService
                 orderId: $order->id
             );
 
-            // Create transaction
+            // Create transaction (skip cash entry on loan)
             $this->transactionService->create([
                 TransactionFieldsEnum::ORDER_ID->value     => $order->id,
                 TransactionFieldsEnum::AMOUNT->value       => $paid,
-                TransactionFieldsEnum::PAID_THROUGH->value => $payload[TransactionFieldsEnum::PAID_THROUGH->value],
+                TransactionFieldsEnum::PAID_THROUGH->value => $paidThrough,
             ]);
 
             DB::commit();

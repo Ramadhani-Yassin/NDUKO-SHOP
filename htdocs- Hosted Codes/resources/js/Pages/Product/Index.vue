@@ -39,7 +39,7 @@ const deleteProductModal = (product) => {
 };
 
 const deleteProduct = () => {
-    form.delete(route('products.destroy', selectedProduct.value.id), {
+    form.post(route('products.destroy', selectedProduct.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -89,11 +89,14 @@ const closeModal = () => {
                             {{ (products.current_page * products.per_page) - (products.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center" :title="product.name">
+                            <!-- Image column is not necessary; commented out. -->
+                            <!--
                             <img
                                 :src="product.photo"
                                 class="h-12 w-12 bg-white rounded-full border"
                                 alt="Inventory management system"
                             />
+                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ truncateString(product.name, 15) }}</span>
                         </TableData>
                         <TableData>{{ product.product_number }}</TableData>

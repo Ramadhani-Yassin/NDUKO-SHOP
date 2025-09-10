@@ -10,11 +10,14 @@
         <span
             class="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full"
         >
+          <!-- User photo not necessary; commented out. -->
+          <!--
           <img
               alt="..."
               class="w-full rounded-full align-middle border-none shadow-lg"
               :src="$page.props.auth.user.photo"
           />
+          -->
         </span>
             </div>
         </a>

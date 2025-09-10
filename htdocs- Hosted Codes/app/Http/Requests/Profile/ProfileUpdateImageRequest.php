@@ -16,7 +16,7 @@ class ProfileUpdateImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "photo" => ["required", "file", "mimes:jpg,jpeg,png,gif,svg", "max:1024"],
+            "photo" => ["nullable", "file", "mimes:jpg,jpeg,png,gif,svg", "max:1024"],
         ];
     }
 }

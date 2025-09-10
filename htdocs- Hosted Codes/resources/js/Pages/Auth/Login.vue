@@ -119,14 +119,16 @@ const submit = () => {
                         </div>
                     </div>
                     <div class="flex flex-wrap mt-6 relative">
-                        <div class="w-1/2">
-                            <Link
+                       <div class="w-1/2">
+                             <!--
+                             <Link
                                 v-if="canResetPassword"
                                 :href="route('password.request')"
                                 class="text-blueGray-200"
                             >
                                 <small>Forgot password?</small>
                             </Link>
+                            -->
                         </div>
                         <div class="w-1/2 text-right">
                            <!--

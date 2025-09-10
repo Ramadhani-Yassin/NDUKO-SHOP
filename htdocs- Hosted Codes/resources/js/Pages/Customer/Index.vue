@@ -86,7 +86,7 @@ const updateCustomer = () => {
 };
 
 const deleteCustomer = () => {
-    form.delete(route('customers.destroy', selectedCustomer.value.id), {
+    form.post(route('customers.destroy', selectedCustomer.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -131,11 +131,14 @@ const closeModal = () => {
                             {{ (customers.current_page * customers.per_page) - (customers.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center">
+                            <!-- Photo not necessary; commented out. -->
+                            <!--
                             <img
                                 :src="customer.photo"
                                 class="h-12 w-12 bg-white rounded-full border"
                                 alt="Inventory management system"
                             />
+                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ customer.name }}</span>
                         </TableData>
                         <TableData>{{ customer.email }}</TableData>
@@ -196,12 +199,14 @@ const closeModal = () => {
                         @keyupEnter="createCustomer"
                     />
                 </div>
+                <!-- Image upload not necessary; commented out. -->
+                <!--
                 <div class="flex flex-col">
                     <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
                         <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path
-                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
+                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04 .74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
                         </svg>
                         <span v-if="form.photo" class="mt-2 text-base leading-normal">{{
                                 form.photo.name.replace(/(^.{17}).*(\..+$)/, "$1...$2")
@@ -216,6 +221,7 @@ const closeModal = () => {
                     </label>
                     <InputError :message="form.errors.photo"/>
                 </div>
+                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea
@@ -271,6 +277,8 @@ const closeModal = () => {
                         @keyupEnter="createCustomer"
                     />
                 </div>
+                <!-- Image upload not necessary; commented out. -->
+                <!--
                 <div class="flex flex-col">
                     <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
@@ -291,6 +299,7 @@ const closeModal = () => {
                     </label>
                     <InputError :message="form.errors.photo"/>
                 </div>
+                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea
