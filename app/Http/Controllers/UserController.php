@@ -10,7 +10,6 @@ use App\Helpers\BaseHelper;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Services\UserService;
 use Inertia\Inertia;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -24,28 +23,6 @@ class UserController extends Controller
             $query = $request->validated();
             $query["sort_by"] = UserSortFieldsEnum::NAME->value;
             return $this->service->getAll($query);
-        }
-
-        // Export handling
-        if ($request->filled('export')) {
-            $page = $this->service->getAll([
-                ...$request->validated(),
-                'per_page' => 100000,
-            ]);
-            $rows = $page->items();
-            $filename = 'users_' . now()->format('Ymd_His') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            ];
-            return response()->stream(function () use ($rows) {
-                $out = fopen('php://output', 'w');
-                fputcsv($out, ['ID', 'Name', 'Email', 'Email Verified At']);
-                foreach ($rows as $u) {
-                    fputcsv($out, [$u->id, $u->name, $u->email, $u->email_verified_at]);
-                }
-                fclose($out);
-            }, 200, $headers);
         }
 
         return Inertia::render(

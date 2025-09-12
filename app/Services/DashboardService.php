@@ -15,7 +15,7 @@ class DashboardService
     {
         $date = $date ? Carbon::parse($date) : Carbon::now();
 
-        // Current month
+        // Get total order count, total profit, and total loss for the current month
         $selectedMonthOrders = Order::query()
             ->when($date, function ($query, $date) {
                 $query->whereMonth('created_at', $date->month)
@@ -23,20 +23,24 @@ class DashboardService
             })
             ->get();
         $selectedMonthTotalOrders = $selectedMonthOrders->count();
-        $selectedMonthTotalSales = $selectedMonthOrders->sum(OrderFieldsEnum::TOTAL->value);
-        $selectedMonthPerOrderProfit = $selectedMonthOrders->sum(OrderFieldsEnum::PROFIT->value);
+        $selectedMonthTotalProfit = $selectedMonthOrders->sum(OrderFieldsEnum::PROFIT->value);
+        $selectedMonthTotalLoss = $selectedMonthOrders->sum(OrderFieldsEnum::LOSS->value);
 
-        // Last month (clone to avoid mutating $date for second use)
-        $lastMonthDate = (clone $date)->subMonth();
         $lastMonthOrders = Order::query()
-            ->whereMonth('created_at', $lastMonthDate->month)
-            ->whereYear('created_at', $lastMonthDate->year)
+            ->when($date, function ($query, $date) {
+                $query->whereMonth('created_at', $date->subMonth()->month)
+                    ->whereYear('created_at', $date->subMonth()->year);
+            })
             ->get();
         $lastMonthTotalOrders = $lastMonthOrders->count();
-        $lastMonthTotalSales = $lastMonthOrders->sum(OrderFieldsEnum::TOTAL->value);
-        $lastMonthPerOrderProfit = $lastMonthOrders->sum(OrderFieldsEnum::PROFIT->value);
+        $lastMonthTotalProfit = $lastMonthOrders->sum(OrderFieldsEnum::PROFIT->value);
+        $lastMonthTotalLoss = $lastMonthOrders->sum(OrderFieldsEnum::LOSS->value);
 
-        // Expenses (by expense_date)
+        // Calculate percentage change for total orders, profit, and loss
+        $orderPercentageChange = ($lastMonthTotalOrders != 0) ? (($selectedMonthTotalOrders - $lastMonthTotalOrders) / $lastMonthTotalOrders) * 100 : 0;
+        $profitPercentageChange = ($lastMonthTotalProfit != 0) ? (($selectedMonthTotalProfit - $lastMonthTotalProfit) / $lastMonthTotalProfit) * 100 : 0;
+        $lossPercentageChange = ($lastMonthTotalLoss != 0) ? (($selectedMonthTotalLoss - $lastMonthTotalLoss) / $lastMonthTotalLoss) * 100 : 0;
+
         $selectedMonthTotalExpenses = Expense::query()
             ->when($date, function ($query, $date) {
                 $query->whereMonth(ExpenseFieldsEnum::EXPENSE_DATE->value, $date->month)
@@ -44,18 +48,11 @@ class DashboardService
             })
             ->sum(ExpenseFieldsEnum::AMOUNT->value);
         $lastMonthTotalExpenses = Expense::query()
-            ->whereMonth(ExpenseFieldsEnum::EXPENSE_DATE->value, $lastMonthDate->month)
-            ->whereYear(ExpenseFieldsEnum::EXPENSE_DATE->value, $lastMonthDate->year)
+            ->when($date, function ($query, $date) {
+                $query->whereMonth(ExpenseFieldsEnum::EXPENSE_DATE->value, $date->subMonth()->month)
+                    ->whereYear(ExpenseFieldsEnum::EXPENSE_DATE->value, $date->subMonth()->year);
+            })
             ->sum(ExpenseFieldsEnum::AMOUNT->value);
-
-        // Dashboard profit reflects Sales - Expenses so expense changes affect profit immediately
-        $selectedMonthTotalProfit = (double) $selectedMonthTotalSales - (double) $selectedMonthTotalExpenses;
-        $lastMonthTotalProfit = (double) $lastMonthTotalSales - (double) $lastMonthTotalExpenses;
-
-        // Percentage changes
-        $orderPercentageChange = ($lastMonthTotalOrders != 0) ? (($selectedMonthTotalOrders - $lastMonthTotalOrders) / $lastMonthTotalOrders) * 100 : 0;
-        $salesPercentageChange = ($lastMonthTotalSales != 0) ? (($selectedMonthTotalSales - $lastMonthTotalSales) / $lastMonthTotalSales) * 100 : 0;
-        $profitPercentageChange = ($lastMonthTotalProfit != 0) ? (($selectedMonthTotalProfit - $lastMonthTotalProfit) / $lastMonthTotalProfit) * 100 : 0;
         $expensePercentageChange = ($lastMonthTotalExpenses != 0) ? (($selectedMonthTotalExpenses - $lastMonthTotalExpenses) / $lastMonthTotalExpenses) * 100 : 0;
 
         return [
@@ -69,10 +66,10 @@ class DashboardService
                 "percentage_change" => abs(BaseHelper::numberFormat($profitPercentageChange)),
                 "stateArray"        => $profitPercentageChange < 0 ? "down" : "up"
             ],
-            "total_sales"       => [
-                "selected"          => (double) $selectedMonthTotalSales,
-                "percentage_change" => abs(BaseHelper::numberFormat($salesPercentageChange)),
-                "stateArray"        => $salesPercentageChange < 0 ? "down" : "up"
+            "total_loss"        => [
+                "selected"          => (double) $selectedMonthTotalLoss,
+                "percentage_change" => abs(BaseHelper::numberFormat($lossPercentageChange)),
+                "stateArray"        => $lossPercentageChange < 0 ? "down" : "up"
             ],
             "total_expense"     => [
                 "selected"          => (double) $selectedMonthTotalExpenses,
@@ -86,33 +83,33 @@ class DashboardService
 
     private function prepareProfitLineChart(): array
     {
-        // Using sales trend similar to migude
-        $currentYearSales = Order::selectRaw('MONTH(created_at) as month, SUM(total) as total_sales')
+        $currentYearProfit = Order::selectRaw('MONTH(created_at) as month, SUM(profit) as total_profit')
+            ->whereYear('created_at', Carbon::now()->year)
             ->where('created_at', '>=', Carbon::now()->subMonths(7))
             ->groupBy('month')
-            ->pluck('total_sales', 'month');
+            ->pluck('total_profit', 'month');
 
-        $lastYearSales = Order::selectRaw('MONTH(created_at) as month, SUM(total) as total_sales')
+        $lastYearProfit = Order::selectRaw('MONTH(created_at) as month, SUM(profit) as total_profit')
             ->whereYear('created_at', Carbon::now()->subYear()->year)
             ->where('created_at', '>=', Carbon::now()->subYear()->subMonths(7))
             ->groupBy('month')
-            ->pluck('total_sales', 'month');
+            ->pluck('total_profit', 'month');
 
         // Loop to get the last 7 months
         $months = [];
-        $currentYearValues = [];
-        $lastYearValues = [];
+        $currentYearProfitValues = [];
+        $lastYearProfitValues = [];
         for ($i = 6; $i >= 0; $i--) {
             $carbon = Carbon::now()->subMonths($i);
             $months[] = $carbon->format('F');
-            $currentYearValues[] = (double) ($currentYearSales[$carbon->month] ?? 0);
-            $lastYearValues[] = (double) ($lastYearSales[$carbon->month] ?? 0);
+            $currentYearProfitValues[] = (double) ($currentYearProfit[$carbon->month] ?? 0);
+            $lastYearProfitValues[] = (double) ($lastYearProfit[$carbon->month] ?? 0);
         }
 
         return [
             "months"       => $months,
-            "current_year" => $currentYearValues,
-            "last_year"    => $lastYearValues,
+            "current_year" => $currentYearProfitValues,
+            "last_year"    => $lastYearProfitValues,
         ];
     }
 

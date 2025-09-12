@@ -22,7 +22,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SalaryController extends Controller
 {
@@ -37,28 +36,6 @@ class SalaryController extends Controller
             ...$params['expand'] ?? [],
             SalaryExpandEnum::EMPLOYEE->value,
         ];
-
-        // Export handling
-        if ($request->filled('export')) {
-            $page = $this->service->getAll([
-                ...$params,
-                'per_page' => 100000,
-            ]);
-            $rows = $page->items();
-            $filename = 'salaries_' . now()->format('Ymd_His') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            ];
-            return response()->stream(function () use ($rows) {
-                $out = fopen('php://output', 'w');
-                fputcsv($out, ['ID', 'Employee', 'Amount', 'Salary Date']);
-                foreach ($rows as $s) {
-                    fputcsv($out, [$s->id, optional($s->employee)->name, $s->amount, $s->salary_date]);
-                }
-                fclose($out);
-            }, 200, $headers);
-        }
 
         return Inertia::render(
             component: 'Salary/Index',

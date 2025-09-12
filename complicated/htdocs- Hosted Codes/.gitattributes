@@ -1,0 +1,22 @@
+# Language control
+*.vue linguist-language=Vue  # Force Vue as primary
+*.php linguist-vendored=true # Reduce PHP weight
+*.css linguist-detectable=true
+*.js linguist-detectable=true
+
+# Non-code files
+/docs/* linguist-documentation=true
+/public/* linguist-vendored=true
+
+# File type handling
+* text=auto eol=lf
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+# Excluded paths
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
