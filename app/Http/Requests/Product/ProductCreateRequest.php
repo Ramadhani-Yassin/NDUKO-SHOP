@@ -42,8 +42,8 @@ class ProductCreateRequest extends FormRequest
             ],
             ProductFieldsEnum::NAME->value          => ["required", "string", "max:255"],
             ProductFieldsEnum::DESCRIPTION->value   => ["nullable", "string"],
-            ProductFieldsEnum::PRODUCT_CODE->value  => ["required", "string", "max:255"],
-            ProductFieldsEnum::ROOT->value          => ["required", "string", "max:255"],
+            ProductFieldsEnum::PRODUCT_CODE->value  => ["nullable", "string", "max:255"],
+            ProductFieldsEnum::ROOT->value          => ["nullable", "string", "max:255"],
             ProductFieldsEnum::BUYING_PRICE->value  => ["required", "numeric"],
             ProductFieldsEnum::SELLING_PRICE->value => ["required", "numeric", "gt:0"],
             ProductFieldsEnum::BUYING_DATE->value   => ["nullable", "date"],
@@ -53,7 +53,7 @@ class ProductCreateRequest extends FormRequest
                 Rule::exists((new UnitType())->getTable(), 'id')
             ],
             ProductFieldsEnum::QUANTITY->value      => ["required", "numeric", "gte:0"],
-            ProductFieldsEnum::PHOTO->value         => ["required", "file", "mimes:jpg,jpeg,png,gif,svg", "max:1024"],
+            ProductFieldsEnum::PHOTO->value         => ["nullable", "file", "mimes:jpg,jpeg,png,gif,svg", "max:1024"],
             ProductFieldsEnum::STATUS->value        => ["required", "string", Rule::in(ProductStatusEnum::values())],
         ];
     }

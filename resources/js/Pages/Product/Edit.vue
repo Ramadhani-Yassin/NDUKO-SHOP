@@ -236,6 +236,8 @@ const updateProduct = () => {
                                 <InputError :message="form.errors.status"/>
                             </div>
                             <div class="flex flex-col">
+                                <!-- Image upload is optional and not needed. Placeholder commented out. -->
+                                <!--
                                 <div class="relative cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
                                     <img
                                         @click="fileInput.click()"
@@ -254,6 +256,7 @@ const updateProduct = () => {
                                     <input type="file" class="hidden" accept="image/*" ref="fileInput" @change="handleFileChange" />
                                 </div>
                                 <InputError :message="form.errors.photo"/>
+                                -->
                             </div>
                             <div class="flex flex-col">
                                 <label for="description" class="text-stone-600 text-sm font-medium">Description</label>

@@ -95,7 +95,7 @@ const updateEmployee = () => {
 };
 
 const deleteEmployee = () => {
-    form.delete(route('employees.destroy', selectedEmployee.value.id), {
+    form.post(route('employees.destroy', selectedEmployee.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -140,11 +140,14 @@ const closeModal = () => {
                             {{ (employees.current_page * employees.per_page) - (employees.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center">
+                            <!-- Photo not necessary; commented out. -->
+                            <!--
                             <img
                                 :src="employee.photo"
                                 class="h-12 w-12 bg-white rounded-full border"
                                 alt="Inventory management system"
                             />
+                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ employee.name }}</span>
                         </TableData>
                         <TableData>{{ employee.designation }}</TableData>
@@ -254,6 +257,8 @@ const closeModal = () => {
                 </div>
             </div>
             <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                <!-- Image upload not necessary; commented out. -->
+                <!--
                 <div class="flex flex-col">
                     <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
@@ -274,6 +279,7 @@ const closeModal = () => {
                     </label>
                     <InputError :message="form.errors.photo"/>
                 </div>
+                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea
@@ -375,6 +381,8 @@ const closeModal = () => {
                 </div>
             </div>
             <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                <!-- Image upload not necessary; commented out. -->
+                <!--
                 <div class="flex flex-col">
                     <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
@@ -395,6 +403,7 @@ const closeModal = () => {
                     </label>
                     <InputError :message="form.errors.photo"/>
                 </div>
+                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea

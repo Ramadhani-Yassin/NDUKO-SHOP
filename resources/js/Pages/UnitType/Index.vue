@@ -75,7 +75,7 @@ const updateUnitType = () => {
 };
 
 const deleteUnitType = () => {
-    form.delete(route('unit-types.destroy', selectedUnitType.value.id), {
+    form.post(route('unit-types.destroy', selectedUnitType.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();

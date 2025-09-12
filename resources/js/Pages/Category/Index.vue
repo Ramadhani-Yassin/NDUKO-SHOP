@@ -73,7 +73,7 @@ const updateCategory = () => {
 };
 
 const deleteCategory = () => {
-    form.delete(route('categories.destroy', selectedCategory.value.id), {
+    form.post(route('categories.destroy', selectedCategory.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();

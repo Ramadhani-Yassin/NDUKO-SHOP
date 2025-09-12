@@ -6,6 +6,8 @@
             <div class="flex flex-wrap justify-center">
                 <div class="w-full px-4 flex justify-center">
                     <div class="relative" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+                        <!-- Profile image upload not necessary; commented out. -->
+                        <!--
                         <img
                             :alt="$page.props.auth.user.name"
                             :src="previewImage || $page.props.auth.user?.photo || avatar"
@@ -20,11 +22,13 @@
                             <i class="fas fa-camera text-white text-2xl"></i>
                         </div>
                         <input type="file" class="hidden" accept="image/*" ref="fileInput" @change="handleFileChange" />
+                        -->
                     </div>
                 </div>
             </div>
             <div class="text-center mt-24 mb-10">
-                <InputError :message="form.errors.photo"/>
+                <!-- Profile image error not necessary; commented out. -->
+                <!-- <InputError :message="form.errors.photo"/> -->
                 <h3 class="text-xl font-semibold leading-normal text-blueGray-700 mb-2">
                     {{ $page.props.auth.user.name }}
                 </h3>

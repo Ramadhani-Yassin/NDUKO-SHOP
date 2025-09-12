@@ -40,7 +40,7 @@ return new class extends Migration {
                 ->nullOnDelete();
 
             $table->decimal(ProductFieldsEnum::QUANTITY->value, 20, 8);
-            $table->string(ProductFieldsEnum::PHOTO->value);
+            $table->string(ProductFieldsEnum::PHOTO->value)->nullable();
             $table->string(ProductFieldsEnum::STATUS->value);
             $table->timestamps();
         });

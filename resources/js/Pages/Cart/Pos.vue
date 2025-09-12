@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head, router} from '@inertiajs/vue3';
 import {useForm} from '@inertiajs/vue3';
-import {watch} from 'vue';
+import {watch, computed} from 'vue';
 import AsyncVueSelect from "@/Components/AsyncVueSelect.vue";
 import {getCurrency, numberFormat, showToast, truncateString} from "@/Utils/Helper.js";
 import InputError from "@/Components/InputError.vue";
@@ -32,6 +32,8 @@ const form = useForm({
     },
 });
 
+const isLoan = computed(() => form.paid_through === 'loan');
+
 // Watch props and update the form fields reactively
 watch(props, (newProps) => {
     if (form.custom_discount.discount_type === "fixed") {
@@ -57,6 +59,13 @@ watch(() => form.custom_discount, async (newForm, oldForm) => {
     deep: true
 })
 
+// When switching to loan, force paid to 0
+watch(isLoan, (val) => {
+    if (val) {
+        form.paid = 0;
+    }
+});
+
 const addToCart = (product) => {
     router.post(route('carts.store', product.id), {}, {
         preserveScroll: true,
@@ -67,7 +76,7 @@ const addToCart = (product) => {
 };
 
 const incrementCartQuantity = (cart) => {
-    router.put(route('carts.increment', cart.id), {}, {
+    router.post(route('carts.increment', cart.id), {}, {
         preserveScroll: true,
         onSuccess: () => {
             showToast();
@@ -76,7 +85,7 @@ const incrementCartQuantity = (cart) => {
 };
 
 const decrementCartQuantity = (cart) => {
-    router.put(route('carts.decrement', cart.id), {}, {
+    router.post(route('carts.decrement', cart.id), {}, {
         preserveScroll: true,
         onSuccess: () => {
             showToast();
@@ -88,7 +97,7 @@ const insertCartQuantity = (cart, quantity) => {
     if (cart.quantity == quantity) {
         return;
     }
-    router.put(route('carts.update', cart.id), {
+    router.post(route('carts.update', cart.id), {
         quantity: quantity,
     }, {
         preserveScroll: true,
@@ -99,7 +108,7 @@ const insertCartQuantity = (cart, quantity) => {
 };
 
 const deleteCart = (cart) => {
-    router.delete(route('carts.delete', cart.id), {
+    router.post(route('carts.delete', cart.id), {
         preserveScroll: true,
         onSuccess: () => {
             showToast();
@@ -108,7 +117,7 @@ const deleteCart = (cart) => {
 };
 
 const deleteCartAllItems = () => {
-    router.delete(route('carts.delete.all'), {
+    router.post(route('carts.delete.all'), {
         onSuccess: () => {
             showToast();
         }
@@ -144,39 +153,28 @@ const createOrder = () => {
                             <div class="flex flex-row justify-between items-center px-5 mt-5">
                                 <div class="text-gray-800">
                                     <div class="font-bold text-xl">Products</div>
-<!--                                    <span class="text-xs">Location ID#SIMON123</span>-->
                                 </div>
-<!--                                <div class="flex items-center">-->
-<!--                                    <div class="text-sm text-center mr-4">-->
-<!--                                        <div class="font-light text-gray-500">last synced</div>-->
-<!--                                        <span class="font-semibold">3 mins ago</span>-->
-<!--                                    </div>-->
-<!--                                    <div>-->
-<!--                                        <span-->
-<!--                                            class="px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded">Help</span>-->
-<!--                                    </div>-->
-<!--                                </div>-->
                             </div>
                             <!-- end header -->
 
                             <!-- products -->
-                            <div class="grid grid-cols-3 gap-4 px-5 mt-5 overflow-y-auto h-4/6">
+                            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 px-4 mt-4 overflow-y-auto h-4/6">
 
                                 <div
                                     v-for="(product, index) in products.data" :key="product.id"
                                     role="button"
-                                    class="select-none cursor-pointer transition-shadow rounded-md bg-white shadow hover:shadow-lg border border-gray-200 flex flex-col justify-between max-h-56"
+                                    class="select-none cursor-pointer transition-shadow rounded-md bg-white shadow hover:shadow-lg border border-gray-200 flex flex-col justify-between"
                                     :title="product.name"
                                     @click="addToCart(product)"
                                 >
-                                    <div class="flex justify-center items-center md:p-3">
-                                        <img :src="product.photo" class="max-h-40 object-cover rounded-md" :alt="product.name">
+                                    <div class="flex justify-center items-center p-1">
+                                        <!-- Product image not necessary; commented out. -->
                                     </div>
-                                    <div class="flex pb-3 px-3 text-sm">
-                                        <p class="flex-grow truncate mr-1">
-                                            <span v-if="product.quantity > 0" class="text-xs font-semibold inline-block py-1 px-2 rounded text-emerald-600 bg-emerald-200">{{ product.quantity }}{{ product.unit_type?.symbol }}</span>
-                                            <span v-if="product.quantity < 1" class="text-xs font-semibold inline-block py-1 px-2 rounded text-red-600 bg-red-200">0</span>
-                                            {{ truncateString(product.name, 11) }}
+                                    <div class="flex pb-1 px-2 text-sm">
+                                        <p class="flex-grow mr-1 whitespace-normal break-words leading-tight">
+                                            <span v-if="product.quantity > 0" class="text-xs font-semibold inline-block py-0.5 px-1.5 rounded text-emerald-600 bg-emerald-200">{{ product.quantity }}{{ product.unit_type?.symbol }}</span>
+                                            <span v-if="product.quantity < 1" class="text-xs font-semibold inline-block py-0.5 px-1.5 rounded text-red-600 bg-red-200">0</span>
+                                            {{ product.name }}
                                         </p>
                                         <p class="nowrap font-semibold">
                                             {{ getCurrency() }}{{ product.selling_price }}
@@ -204,19 +202,17 @@ const createOrder = () => {
                             </div>
                             <!-- end header -->
                             <!-- order list -->
-                            <div class="px-5 py-2 overflow-y-auto h-64">
+                            <div class="px-5 py-2 overflow-y-auto h-60">
 
                                 <div
                                     v-for="cart in carts.data"
                                     :key="cart.id"
-                                    class="flex flex-row justify-between items-center mb-4"
+                                    class="flex flex-row justify-between items-center mb-3"
                                     :class="cart.quantity > cart.product.quantity ? 'bg-red-200' : ''"
                                 >
                                     <div class="flex flex-row items-center w-2/5" :title="cart.product.name">
-                                        <img :src="cart.product.photo"
-                                             class="w-10 h-10 object-cover rounded-md" :alt="cart.product.name">
-                                        <span class="ml-1 font-semibold text-sm">
-                                            {{ truncateString(cart.product.name) }}
+                                        <span class="ml-1 font-semibold text-sm whitespace-normal break-words leading-tight line-clamp-2">
+                                            {{ cart.product.name }}
                                             <br>
                                             Q: {{ numberFormat(cart.product.quantity) }} {{ cart.product.unit_type?.symbol }}
                                         </span>
@@ -225,18 +221,18 @@ const createOrder = () => {
                                         <span
                                             role="button"
                                             @click="decrementCartQuantity(cart)"
-                                            class="px-3 py-1 rounded-l-md bg-gray-300 "
+                                            class="px-3 py-0.5 rounded-l-md bg-gray-300 "
                                         >-</span>
                                         <input
                                             @keyup.enter="insertCartQuantity(cart, $event.target.value)"
                                             type="number"
-                                            class="font-semibold border-gray-300 px-0.5 py-1 w-10 text-center"
+                                            class="font-semibold border-gray-300 px-0.5 py-0.5 w-10 text-center"
                                             :value="cart.quantity"
                                         >
                                         <span
                                             @click="incrementCartQuantity(cart)"
                                             role="button"
-                                            class="px-3 py-1 rounded-r-md bg-gray-300 "
+                                            class="px-3 py-0.5 rounded-r-md bg-gray-300 "
                                         >+</span>
                                     </div>
                                     <div class="font-semibold text-lg w-16 text-center">
@@ -329,10 +325,12 @@ const createOrder = () => {
                                                 id="paid"
                                                 placeholder="Enter paid amount"
                                                 v-model="form.paid"
+                                                :disabled="isLoan"
                                                 type="text"
                                                 class="w-full rounded-r-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                                             />
                                         </div>
+                                        <p v-if="isLoan" class="text-xs text-gray-600 mt-1">This sale will be recorded as a customer loan (no cash collected).</p>
                                         <InputError :message="form.errors.paid"/>
                                     </div>
                                 </div>

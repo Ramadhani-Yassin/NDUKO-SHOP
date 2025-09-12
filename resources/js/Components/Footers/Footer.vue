@@ -24,7 +24,7 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl font-semibold">Let's keep in touch!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Need Similar System For Your Shop...? Consult 📧 Me ASAP 😊
+                        Need Similar System For Your Shop...? Consult 📧 Me via Email: yasynramah@gmail.com
                     </h5>
                     <div class="mt-6 lg:mb-0 mb-6">
 <!--                        <button-->
@@ -40,19 +40,29 @@
 <!--                            <i class="fab fa-facebook-square"></i>-->
 <!--                        </button>-->
                         <button
-                            class="bg-white text-blue-500 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button"
-                            onclick="window.open('https://www.linkedin.com/in/ramadhani-ramadhani-8b5045270', '_blank')"
-                        >
-                            <i class="fab fa-linkedin"></i>
-                        </button>
-                        <button
-                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button"
-                            onclick="window.open('https://github.com/Ramadhani-Yassin', '_blank')"
-                        >
-                            <i class="fab fa-github"></i>
-                        </button>
+    class="bg-white text-blue-500 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+    type="button"
+    onclick="window.open('https://www.linkedin.com/in/ramadhani-yassin-ramadhani')"
+>
+    <i class="fab fa-linkedin"></i>
+</button>
+
+<button
+    class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+    type="button"
+    onclick="window.open('https://github.com/Ramadhani-Yassin', '_blank')"
+>
+    <i class="fab fa-github"></i>
+</button>
+
+<button
+    class="bg-white text-pink-500 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+    type="button"
+    onclick="window.open('https://www.instagram.com/rm_tech.tz/', '_blank')"
+>
+    <i class="fab fa-instagram"></i>
+</button>
+
                     </div>
                 </div>
                 <div class="w-full lg:w-6/12 px-4">
@@ -75,7 +85,7 @@
                                 <li>
                                     <a
                                         class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="https://rmtech.digital/?i=1"
+                                        href="https://resilient-matrix.vercel.app/"
                                     >
                                         Blog
                                     </a>
