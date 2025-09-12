@@ -90,10 +90,16 @@ const closeModal = () => {
                     :paginatedData="orders"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{orders.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Orders ({{orders.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('orders.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                             <Button
                                 :href="route('carts.index')"
                                 buttonType="link"
@@ -148,13 +154,6 @@ const closeModal = () => {
                             <Button @click="viewOrderItemsModal(order)" title="Order Items">
                                 <i class="fa fa-list"></i>
                             </Button>
-<!--                            <Button-->
-<!--                                :href="route('orders.show', order.id)"-->
-<!--                                buttonType="link"-->
-<!--                                preserveScroll-->
-<!--                            >-->
-<!--                                <i class="fa fa-eye"></i>-->
-<!--                            </Button>-->
                         </TableData>
                     </tr>
                 </CardTable>

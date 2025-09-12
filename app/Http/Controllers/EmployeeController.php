@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployeeController extends Controller
 {
@@ -24,12 +25,28 @@ class EmployeeController extends Controller
     {
     }
 
-    public function index(EmployeeIndexRequest $request)
+    public function index(EmployeeIndexRequest $request): Response
     {
-        if ($request->inertia == "disabled"){
-            $query = $request->validated();
-            $query["sort_by"] = EmployeeSortFieldsEnum::NAME->value;
-            return $this->service->getAll($query);
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'employees_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['ID', 'Name', 'Designation', 'Email', 'Phone', 'Salary', 'Joining Date']);
+                foreach ($rows as $e) {
+                    fputcsv($out, [$e->id, $e->name, $e->designation, $e->email, $e->phone, $e->salary, $e->joining_date]);
+                }
+                fclose($out);
+            }, 200, $headers);
         }
 
         return Inertia::render(
@@ -55,11 +72,11 @@ class EmployeeController extends Controller
                         'type'        => FilterFieldTypeEnum::STRING->value,
                         'value'       => $request->validated()[EmployeeFiltersEnum::PHONE->value] ?? "",
                     ],
-                    EmployeeFiltersEnum::NID->value          => [
-                        'label'       => EmployeeFiltersEnum::NID->label(),
-                        'placeholder' => 'Enter NID.',
+                    EmployeeFiltersEnum::DESIGNATION->value  => [
+                        'label'       => EmployeeFiltersEnum::DESIGNATION->label(),
+                        'placeholder' => 'Enter designation.',
                         'type'        => FilterFieldTypeEnum::STRING->value,
-                        'value'       => $request->validated()[EmployeeFiltersEnum::NID->value] ?? "",
+                        'value'       => $request->validated()[EmployeeFiltersEnum::DESIGNATION->value] ?? "",
                     ],
                     EmployeeFiltersEnum::SALARY->value       => [
                         'label'       => EmployeeFiltersEnum::SALARY->label(),
@@ -86,12 +103,6 @@ class EmployeeController extends Controller
                         'type'        => FilterFieldTypeEnum::SELECT_STATIC->value,
                         'value'       => $request->validated()['sort_order'] ?? "",
                         'options'     => BaseHelper::convertKeyValueToLabelValueArray(SortOrderEnum::choices()),
-                    ],
-                    EmployeeFiltersEnum::CREATED_AT->value   => [
-                        'label'       => EmployeeFiltersEnum::CREATED_AT->label(),
-                        'placeholder' => 'Enter created at.',
-                        'type'        => FilterFieldTypeEnum::DATETIME_RANGE->value,
-                        'value'       => $request->validated()[EmployeeFiltersEnum::CREATED_AT->value] ?? "",
                     ],
                 ],
             ]);

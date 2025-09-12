@@ -4,9 +4,12 @@
             <div class="flex flex-wrap items-center">
                 <div class="relative w-full px-4 max-w-full flex-grow flex-1">
 
-                    <slot name="cardHeader"/>
+                    <div class="flex items-center justify-between">
+                        <slot name="cardHeader"/>
+                        <slot name="cardHeaderRight"/>
+                    </div>
 
-                    <div class="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+                    <div v-if="showFilters" class="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                         <div
                             v-for="(filter, key, index) in filters" :key="index"
                             class="flex flex-col"
@@ -167,7 +170,11 @@ export default {
         indexRoute: String,
         paginatedData: Object,
         filters: Object,
-        tableHeads: Array
+        tableHeads: Array,
+        showFilters: {
+            type: Boolean,
+            default: false,
+        }
     },
     data() {
         return {
@@ -179,6 +186,7 @@ export default {
         form: {
             deep: true,
             handler: throttle(function () {
+                if (!this.showFilters) return;
                 // Check the form is changed
                 let isFormChanged = false;
                 for (const key in this.filters) {

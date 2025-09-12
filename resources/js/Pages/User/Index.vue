@@ -33,10 +33,16 @@ const tableHeads = ref(['#', "Name", "Email", "Email Verified At"]);
                     :paginatedData="users"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{users.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Users ({{users.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('users.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                         </div>
                     </template>
 
@@ -45,14 +51,6 @@ const tableHeads = ref(['#', "Name", "Email", "Email Verified At"]);
                             {{ (users.current_page * users.per_page) - (users.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center" :title="user.name">
-                            <!-- Photo not necessary; commented out. -->
-                            <!--
-                            <img
-                                :src="user.photo"
-                                class="h-12 w-12 bg-white rounded-full border"
-                                alt="Inventory management system"
-                            />
-                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ truncateString(user.name, 20) }}</span>
                         </TableData>
                         <TableData>{{ user.email }}</TableData>

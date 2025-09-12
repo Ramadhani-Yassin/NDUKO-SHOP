@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UnitTypeController extends Controller
 {
@@ -30,6 +31,28 @@ class UnitTypeController extends Controller
             $query = $request->validated();
             $query["sort_by"] = UnitTypeSortFieldsEnum::NAME->value;
             return $this->service->getAll($query);
+        }
+
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'unit_types_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['ID', 'Name', 'Symbol']);
+                foreach ($rows as $u) {
+                    fputcsv($out, [$u->id, $u->name, $u->symbol]);
+                }
+                fclose($out);
+            }, 200, $headers);
         }
 
         return Inertia::render(

@@ -33,10 +33,16 @@ const tableHeads = ref(['#', "Transaction Number", "Order Number", "Amount", "Pa
                     :paginatedData="transactions"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{transactions.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Transactions ({{transactions.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('transactions.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                         </div>
                     </template>
 

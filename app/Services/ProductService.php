@@ -11,6 +11,7 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\BaseHelper;
 use App\Models\Product;
 use App\Repositories\ProductRepository;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -78,17 +79,25 @@ class ProductService
             );
         }
 
+        $buyingDate = $payload[ProductFieldsEnum::BUYING_DATE->value] ?? null;
+        if (!empty($buyingDate)) {
+            // Normalize to proper datetime for timestamp column
+            $buyingDate = Carbon::parse($buyingDate);
+        } else {
+            $buyingDate = null;
+        }
+
         $processPayload = [
             ProductFieldsEnum::CATEGORY_ID->value    => $payload[ProductFieldsEnum::CATEGORY_ID->value],
             ProductFieldsEnum::SUPPLIER_ID->value    => $payload[ProductFieldsEnum::SUPPLIER_ID->value],
             ProductFieldsEnum::NAME->value           => $payload[ProductFieldsEnum::NAME->value],
-            ProductFieldsEnum::DESCRIPTION->value    => $payload[ProductFieldsEnum::DESCRIPTION->value],
+            ProductFieldsEnum::DESCRIPTION->value    => $payload[ProductFieldsEnum::DESCRIPTION->value] ?? null,
             ProductFieldsEnum::PRODUCT_NUMBER->value => 'P-' . Str::random(5),
             ProductFieldsEnum::PRODUCT_CODE->value   => $payload[ProductFieldsEnum::PRODUCT_CODE->value] ?? null,
             ProductFieldsEnum::ROOT->value           => $payload[ProductFieldsEnum::ROOT->value] ?? null,
             ProductFieldsEnum::BUYING_PRICE->value   => $payload[ProductFieldsEnum::BUYING_PRICE->value],
             ProductFieldsEnum::SELLING_PRICE->value  => $payload[ProductFieldsEnum::SELLING_PRICE->value],
-            ProductFieldsEnum::BUYING_DATE->value    => $payload[ProductFieldsEnum::BUYING_DATE->value],
+            ProductFieldsEnum::BUYING_DATE->value    => $buyingDate,
             ProductFieldsEnum::UNIT_TYPE_ID->value   => $payload[ProductFieldsEnum::UNIT_TYPE_ID->value],
             ProductFieldsEnum::QUANTITY->value       => $payload[ProductFieldsEnum::QUANTITY->value],
             ProductFieldsEnum::PHOTO->value          => $photo,
@@ -118,6 +127,13 @@ class ProductService
             );
         }
 
+        $buyingDate = $payload[ProductFieldsEnum::BUYING_DATE->value] ?? null;
+        if (!empty($buyingDate)) {
+            $buyingDate = Carbon::parse($buyingDate);
+        } else {
+            $buyingDate = $product->buying_date;
+        }
+
         $processPayload = [
             ProductFieldsEnum::CATEGORY_ID->value   => $payload[ProductFieldsEnum::CATEGORY_ID->value] ?? $product->category_id,
             ProductFieldsEnum::SUPPLIER_ID->value   => $payload[ProductFieldsEnum::SUPPLIER_ID->value] ?? $product->supplier_id,
@@ -127,7 +143,7 @@ class ProductService
             ProductFieldsEnum::ROOT->value          => $payload[ProductFieldsEnum::ROOT->value] ?? $product->root,
             ProductFieldsEnum::BUYING_PRICE->value  => $payload[ProductFieldsEnum::BUYING_PRICE->value] ?? $product->buying_price,
             ProductFieldsEnum::SELLING_PRICE->value => $payload[ProductFieldsEnum::SELLING_PRICE->value] ?? $product->selling_price,
-            ProductFieldsEnum::BUYING_DATE->value   => $payload[ProductFieldsEnum::BUYING_DATE->value] ?? $product->buying_date,
+            ProductFieldsEnum::BUYING_DATE->value   => $buyingDate,
             ProductFieldsEnum::UNIT_TYPE_ID->value  => $payload[ProductFieldsEnum::UNIT_TYPE_ID->value] ?? $product->unit_type_id,
             ProductFieldsEnum::QUANTITY->value      => $payload[ProductFieldsEnum::QUANTITY->value] ?? $product->quantity,
             ProductFieldsEnum::PHOTO->value         => $photo,

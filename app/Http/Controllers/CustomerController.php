@@ -18,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerController extends Controller
 {
@@ -31,6 +32,28 @@ class CustomerController extends Controller
             $query = $request->validated();
             $query["sort_by"] = CustomerSortFieldsEnum::NAME->value;
             return $this->service->getAll($query);
+        }
+
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'customers_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['ID', 'Name', 'Email', 'Phone', 'Address']);
+                foreach ($rows as $c) {
+                    fputcsv($out, [$c->id, $c->name, $c->email, $c->phone, $c->address]);
+                }
+                fclose($out);
+            }, 200, $headers);
         }
 
         return Inertia::render(

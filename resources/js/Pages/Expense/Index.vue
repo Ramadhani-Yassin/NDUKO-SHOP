@@ -107,10 +107,16 @@ const closeModal = () => {
                     :paginatedData="expenses"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{expenses.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Expenses ({{expenses.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('expenses.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                             <Button @click=" showCreateModal = true">Create Expense</Button>
                         </div>
                     </template>
@@ -146,38 +152,43 @@ const closeModal = () => {
             @close="closeModal"
             @submitAction="createExpense"
         >
-            <div>
-                <DashboardInputGroup
-                    label="Name"
-                    name="name"
-                    v-model="form.name"
-                    placeholder="Enter name"
-                    :errorMessage="form.errors.name"
-                    @keyupEnter="createExpense"
-                />
-            </div>
-            <div class="mt-2 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                <div class="flex flex-col overflow-auto">
-                    <DashboardInputGroup
-                        label="Amount"
-                        name="amount"
-                        v-model="form.amount"
-                        placeholder="Enter amount"
-                        :errorMessage="form.errors.amount"
-                        @keyupEnter="createExpense"
-                        type="number"
+            <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                <div class="flex flex-col">
+                    <label for="name">Name</label>
+                    <input
+                        id="name"
+                        ref="nameInput"
+                        v-model="form.name"
+                        @keyup.enter="createExpense"
+                        type="text"
+                        placeholder="Enter name"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                     />
+                    <InputError :message="form.errors.name"/>
                 </div>
-                <div class="flex flex-col overflow-auto">
-                    <DashboardInputGroup
-                        label="Expense Date"
-                        name="expense_date"
-                        v-model="form.expense_date"
-                        placeholder="Enter expense date"
-                        :errorMessage="form.errors.expense_date"
-                        @keyupEnter="createExpense"
-                        type="date"
+                <div class="flex flex-col">
+                    <label for="amount">Amount</label>
+                    <input
+                        id="amount"
+                        v-model="form.amount"
+                        @keyup.enter="createExpense"
+                        type="number"
+                        placeholder="Enter amount"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                     />
+                    <InputError :message="form.errors.amount"/>
+                </div>
+                <div class="flex flex-col">
+                    <label for="expense_date">Expense Date</label>
+                    <input
+                        id="expense_date"
+                        v-model="form.expense_date"
+                        @keyup.enter="createExpense"
+                        type="date"
+                        placeholder="Enter expense date"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
+                    />
+                    <InputError :message="form.errors.expense_date"/>
                 </div>
             </div>
             <div class="mt-2">
@@ -202,38 +213,43 @@ const closeModal = () => {
             @close="closeModal"
             @submitAction="updateExpense"
         >
-            <div>
-                <DashboardInputGroup
-                    label="Name"
-                    name="name"
-                    v-model="form.name"
-                    placeholder="Enter name"
-                    :errorMessage="form.errors.name"
-                    @keyupEnter="createExpense"
-                />
-            </div>
-            <div class="mt-2 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                <div class="flex flex-col overflow-auto">
-                    <DashboardInputGroup
-                        label="Amount"
-                        name="amount"
-                        v-model="form.amount"
-                        placeholder="Enter amount"
-                        :errorMessage="form.errors.amount"
-                        @keyupEnter="createExpense"
-                        type="number"
+            <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                <div class="flex flex-col">
+                    <label for="name">Name</label>
+                    <input
+                        id="name"
+                        ref="nameInput"
+                        v-model="form.name"
+                        @keyup.enter="updateExpense"
+                        type="text"
+                        placeholder="Enter name"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                     />
+                    <InputError :message="form.errors.name"/>
                 </div>
-                <div class="flex flex-col overflow-auto">
-                    <DashboardInputGroup
-                        label="Expense Date"
-                        name="expense_date"
-                        v-model="form.expense_date"
-                        placeholder="Enter expense date"
-                        :errorMessage="form.errors.expense_date"
-                        @keyupEnter="createExpense"
-                        type="date"
+                <div class="flex flex-col">
+                    <label for="amount">Amount</label>
+                    <input
+                        id="amount"
+                        v-model="form.amount"
+                        @keyup.enter="updateExpense"
+                        type="number"
+                        placeholder="Enter amount"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                     />
+                    <InputError :message="form.errors.amount"/>
+                </div>
+                <div class="flex flex-col">
+                    <label for="expense_date">Expense Date</label>
+                    <input
+                        id="expense_date"
+                        v-model="form.expense_date"
+                        @keyup.enter="updateExpense"
+                        type="date"
+                        placeholder="Enter expense date"
+                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
+                    />
+                    <InputError :message="form.errors.expense_date"/>
                 </div>
             </div>
             <div class="mt-2">

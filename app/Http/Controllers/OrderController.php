@@ -23,6 +23,7 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
@@ -41,6 +42,41 @@ class OrderController extends Controller
             OrderExpandEnum::CUSTOMER->value,
             OrderExpandEnum::ORDER_ITEMS_PRODUCT->value . '.' . ProductExpandEnum::UNIT_TYPE->value,
         ]));
+
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$params,
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'orders_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['Order #', 'Customer', 'Sub Total', 'Tax', 'Discount', 'Total', 'Paid', 'Due', 'Profit', 'Loss', 'Status', 'Date']);
+                foreach ($rows as $o) {
+                    fputcsv($out, [
+                        $o->order_number,
+                        $o->customer->name ?? '',
+                        $o->sub_total,
+                        $o->tax_total,
+                        $o->discount_total,
+                        $o->total,
+                        $o->paid,
+                        $o->due,
+                        $o->profit,
+                        $o->loss,
+                        $o->status,
+                        $o->created_at,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
 
         return Inertia::render(
             component: 'Order/Index',

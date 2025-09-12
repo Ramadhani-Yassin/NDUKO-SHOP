@@ -15,6 +15,7 @@ use App\Http\Requests\Transaction\TransactionIndexRequest;
 use App\Services\TransactionService;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
@@ -28,6 +29,34 @@ class TransactionController extends Controller
         $params['expand'] = array_unique(array_merge($params['expand'] ?? [], [
             TransactionExpandEnum::ORDER->value,
         ]));
+
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$params,
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'transactions_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['Transaction #', 'Order #', 'Amount', 'Paid Through', 'Created At']);
+                foreach ($rows as $t) {
+                    fputcsv($out, [
+                        $t->transaction_number,
+                        $t->order->order_number ?? '',
+                        $t->amount,
+                        $t->paid_through,
+                        $t->created_at,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
 
         return Inertia::render(
             component: 'Transaction/Index',

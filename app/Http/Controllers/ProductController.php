@@ -24,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
@@ -39,6 +40,38 @@ class ProductController extends Controller
             ProductExpandEnum::SUPPLIER->value,
             ProductExpandEnum::UNIT_TYPE->value,
         ]));
+
+        // Export handling
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$params,
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'products_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['ID', 'Name', 'Product Number', 'Product Code', 'Category', 'Supplier', 'Quantity', 'Unit', 'Status']);
+                foreach ($rows as $p) {
+                    fputcsv($out, [
+                        $p->id,
+                        $p->name,
+                        $p->product_number,
+                        $p->product_code,
+                        $p->category->name ?? '',
+                        $p->supplier->name ?? '',
+                        $p->quantity,
+                        $p->unit_type->symbol ?? '',
+                        $p->status,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
 
         return Inertia::render(
             component: 'Product/Index',

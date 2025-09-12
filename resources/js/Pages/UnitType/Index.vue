@@ -107,10 +107,16 @@ const closeModal = () => {
                     :paginatedData="unitTypes"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{unitTypes.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Unit Types ({{unitTypes.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('unit-types.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                             <Button @click="createUnitTypeModal">Create UnitType</Button>
                         </div>
                     </template>
@@ -158,18 +164,6 @@ const closeModal = () => {
                 />
                 <InputError :message="form.errors.name"/>
             </div>
-            <div class="mt-2">
-                <label for="symbol">Symbol</label>
-                <input
-                    id="symbol"
-                    v-model="form.symbol"
-                    @keyup.enter="createUnitType"
-                    type="text"
-                    placeholder="Enter symbol"
-                    class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:shadow-outline w-full"
-                />
-                <InputError :message="form.errors.symbol"/>
-            </div>
         </Modal>
 
         <!--Edit data-->
@@ -192,18 +186,6 @@ const closeModal = () => {
                     class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:shadow-outline w-full"
                 />
                 <InputError :message="form.errors.name"/>
-            </div>
-            <div class="mt-2">
-                <label for="symbol">Symbol</label>
-                <input
-                    id="symbol"
-                    v-model="form.symbol"
-                    @keyup.enter="updateUnitType"
-                    type="text"
-                    placeholder="Enter symbol"
-                    class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:shadow-outline w-full"
-                />
-                <InputError :message="form.errors.symbol"/>
             </div>
         </Modal>
 

@@ -15,6 +15,7 @@ export default {
             default: "name"
         },
         placeholder: String,
+        modelValue: [String, Number, Object, Array, null],
     },
     data: () => ({
         observer: null,
@@ -73,6 +74,9 @@ export default {
                 ul.scrollTop = scrollTop;
             }
         },
+        updateValue(val) {
+            this.$emit('update:modelValue', val)
+        }
     },
     watch: {
         search(newSearch) {
@@ -97,6 +101,8 @@ export default {
         :reduce="option => option.id"
         :label="resourceLabel"
         :placeholder="this.placeholder"
+        :modelValue="modelValue"
+        @update:modelValue="updateValue"
     >
         <template #list-footer>
             <li v-show="hasNextPage" ref="load" class="loader">

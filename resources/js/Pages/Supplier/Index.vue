@@ -120,10 +120,16 @@ const closeModal = () => {
                     :paginatedData="suppliers"
                     :filters="filters"
                     :tableHeads="tableHeads"
+                    :showFilters="false"
                 >
                     <template #cardHeader>
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{suppliers.total}})</h4>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-2xl">Suppliers ({{suppliers.total}})</h4>
+                        </div>
+                    </template>
+                    <template #cardHeaderRight>
+                        <div class="flex items-center gap-2">
+                            <a :href="route('suppliers.index', { export: 'excel' })" class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">Export</a>
                             <Button @click="createSupplierModal">Create Supplier</Button>
                         </div>
                     </template>
@@ -133,14 +139,6 @@ const closeModal = () => {
                             {{ (suppliers.current_page * suppliers.per_page) - (suppliers.per_page - (index + 1)) }}
                         </TableData>
                         <TableData class="text-left flex items-center">
-                            <!-- Photo not necessary; commented out. -->
-                            <!--
-                            <img
-                                :src="supplier.photo"
-                                class="h-12 w-12 bg-white rounded-full border"
-                                alt="Inventory management system"
-                            />
-                            -->
                             <span class="ml-3 font-bold text-blueGray-600">{{ supplier.name }}</span>
                         </TableData>
                         <TableData>{{ supplier.email }}</TableData>
