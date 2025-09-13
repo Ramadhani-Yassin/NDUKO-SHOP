@@ -11,8 +11,8 @@ import {watch} from "vue";
 const props = defineProps({
     date: String,
     total_orders: Object,
+    total_sales: Object,
     total_profit: Object,
-    total_loss: Object,
     total_expense: Object,
     profit_line_chart: Object,
     orders_bar_chart: Object,
@@ -54,8 +54,8 @@ watch(() => form.date, async (newDateRange, oldDateRange) => {
         <template #headerState>
             <HeaderStats
                 :total_orders="total_orders"
+                :total_sales="total_sales"
                 :total_profit="total_profit"
-                :total_loss="total_loss"
                 :total_expense="total_expense"
             />
         </template>

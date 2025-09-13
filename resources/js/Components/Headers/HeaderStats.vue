@@ -14,6 +14,18 @@
         </div>
         <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
             <card-stats
+                statSubtitle="SALES"
+                :statTitle="total_sales.selected"
+                :statArrow="total_sales.stateArray"
+                :statPercent="total_sales.percentage_change"
+                :statPercentColor="total_sales.stateArray === 'up' ? 'text-emerald-500' : 'text-red-500'"
+                statDescripiron="Since last month"
+                statIconName="fas fa-dollar-sign"
+                statIconColor="bg-green-500"
+            />
+        </div>
+        <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
+            <card-stats
                 statSubtitle="PROFIT"
                 :statTitle="total_profit.selected"
                 :statArrow="total_profit.stateArray"
@@ -22,18 +34,6 @@
                 statDescripiron="Since last month"
                 statIconName="fas fa-chart-bar"
                 statIconColor="bg-orange-500"
-            />
-        </div>
-        <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
-            <card-stats
-                statSubtitle="LOSS"
-                :statTitle="total_loss.selected"
-                :statArrow="total_loss.stateArray"
-                :statPercent="total_loss.percentage_change"
-                :statPercentColor="total_loss.stateArray === 'up' ? 'text-emerald-500' : 'text-red-500'"
-                statDescripiron="Since last month"
-                statIconName="fas fa-thumbs-down"
-                statIconColor="bg-pink-500"
             />
         </div>
         <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
@@ -56,8 +56,8 @@ import CardStats from "@/Components/Cards/CardStats.vue";
 
 defineProps({
     total_orders: Object,
+    total_sales: Object,
     total_profit: Object,
-    total_loss: Object,
     total_expense: Object
 });
 </script>
