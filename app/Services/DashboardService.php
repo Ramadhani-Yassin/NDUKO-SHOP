@@ -47,8 +47,12 @@ class DashboardService
             ->sum('amount');
 
         // Calculate profit from individual order items (quantity * (selling_price - buying_price))
-        $selectedMonthTotalProfit = $this->calculateOrderItemsProfit($selectedMonthOrders);
-        $lastMonthTotalProfit = $this->calculateOrderItemsProfit($lastMonthOrders);
+        $selectedMonthGrossProfit = $this->calculateOrderItemsProfit($selectedMonthOrders);
+        $lastMonthGrossProfit = $this->calculateOrderItemsProfit($lastMonthOrders);
+
+        // Calculate net profit (gross profit minus expenses)
+        $selectedMonthTotalProfit = $selectedMonthGrossProfit - $selectedMonthTotalExpenses;
+        $lastMonthTotalProfit = $lastMonthGrossProfit - $lastMonthTotalExpenses;
 
         // Calculate percentage changes
         $orderPercentageChange = ($lastMonthTotalOrders != 0) ? (($selectedMonthTotalOrders - $lastMonthTotalOrders) / $lastMonthTotalOrders) * 100 : 0;
@@ -65,7 +69,8 @@ class DashboardService
             "total_sales"       => [
                 "selected"          => (double) $selectedMonthTotalSales,
                 "percentage_change" => abs(BaseHelper::numberFormat($salesPercentageChange)),
-                "stateArray"        => $salesPercentageChange < 0 ? "down" : "up"
+                "stateArray"        => $salesPercentageChange < 0 ? "down" : "up",
+                "currency"          => "TZS"
             ],
             "total_profit"      => [
                 "selected"          => (double) $selectedMonthTotalProfit,
@@ -101,9 +106,15 @@ class DashboardService
         return $totalProfit;
     }
 
+    private function calculateNetProfit($orders, $expenses)
+    {
+        $grossProfit = $this->calculateOrderItemsProfit($orders);
+        return $grossProfit - $expenses;
+    }
+
     private function prepareProfitLineChart(): array
     {
-        // Get profit data for the last 7 months from order items
+        // Get profit data for the last 7 months from order items minus expenses
         $currentYearProfit = [];
         $lastYearProfit = [];
         
@@ -114,13 +125,23 @@ class DashboardService
             $currentYearOrders = Order::whereMonth('created_at', $carbon->month)
                 ->whereYear('created_at', $carbon->year)
                 ->get();
-            $currentYearProfit[] = $this->calculateOrderItemsProfit($currentYearOrders);
+            
+            $currentYearExpenses = Expense::whereMonth('expense_date', $carbon->month)
+                ->whereYear('expense_date', $carbon->year)
+                ->sum('amount');
+            
+            $currentYearProfit[] = $this->calculateNetProfit($currentYearOrders, $currentYearExpenses);
             
             // Last year profit
             $lastYearOrders = Order::whereMonth('created_at', $carbon->month)
                 ->whereYear('created_at', $carbon->subYear()->year)
                 ->get();
-            $lastYearProfit[] = $this->calculateOrderItemsProfit($lastYearOrders);
+            
+            $lastYearExpenses = Expense::whereMonth('expense_date', $carbon->month)
+                ->whereYear('expense_date', $carbon->subYear()->year)
+                ->sum('amount');
+            
+            $lastYearProfit[] = $this->calculateNetProfit($lastYearOrders, $lastYearExpenses);
         }
 
         // Loop to get the last 7 months

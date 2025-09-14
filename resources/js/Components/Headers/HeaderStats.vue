@@ -20,7 +20,7 @@
                 :statPercent="total_sales.percentage_change"
                 :statPercentColor="total_sales.stateArray === 'up' ? 'text-emerald-500' : 'text-red-500'"
                 statDescripiron="Since last month"
-                statIconName="fas fa-dollar-sign"
+                statIconName="fas fa-coins"
                 statIconColor="bg-green-500"
             />
         </div>
