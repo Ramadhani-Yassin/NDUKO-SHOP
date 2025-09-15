@@ -1,4 +1,10 @@
 zip -r ../ndk-app.zip . -x "node_modules/*" ".git/*" "tests/*" "vendor/*"
 zip -r ../vendor.zip vendor
 
+
+After upload files to htdocs online server set Environmental Variables.
+Copy build folder from /public to root folder where there is appp http vendor and other folders.
+Then copy htacess from public root folder as well.
+
+
 npm run build
