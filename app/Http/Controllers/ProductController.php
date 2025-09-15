@@ -24,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
@@ -31,8 +32,46 @@ class ProductController extends Controller
     {
     }
 
-    public function index(ProductIndexRequest $request): Response
+    public function index(ProductIndexRequest $request): Response|StreamedResponse
     {
+        if ($request->filled('export')) {
+            $params = $request->validated();
+            $params['expand'] = array_unique(array_merge($params['expand'] ?? [], [
+                ProductExpandEnum::CATEGORY->value,
+                ProductExpandEnum::SUPPLIER->value,
+                ProductExpandEnum::UNIT_TYPE->value,
+            ]));
+            $page = $this->service->getAll([
+                ...$params,
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'products_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['#', 'Name', 'Product Number', 'Product Code', 'Category', 'Supplier', 'Quantity', 'Unit', 'Status']);
+                $i = 1;
+                foreach ($rows as $p) {
+                    fputcsv($out, [
+                        $i++,
+                        $p->name,
+                        $p->product_number,
+                        $p->product_code,
+                        $p->category?->name,
+                        $p->supplier?->name,
+                        $p->quantity,
+                        $p->unit_type?->symbol,
+                        $p->status,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
+
         $params = $request->validated();
         $params['expand'] = array_unique(array_merge($params['expand'] ?? [], [
             ProductExpandEnum::CATEGORY->value,

@@ -26,7 +26,7 @@ class DashboardService
             ->whereYear('created_at', $date->year)
             ->get();
         $selectedMonthTotalOrders = $selectedMonthOrders->count();
-        $selectedMonthTotalSales = $selectedMonthOrders->sum('paid'); // Sum of all money paid (cash, bank, loan payments)
+        $selectedMonthTotalSales = $selectedMonthOrders->sum('paid'); // Sum only paid amounts (cash & Lipa Namba instantly; loan after payment)
 
         $lastMonthOrders = Order::query()
             ->whereMonth('created_at', $date->copy()->subMonth()->month)
@@ -46,9 +46,9 @@ class DashboardService
             ->whereYear('expense_date', $date->copy()->subMonth()->year)
             ->sum('amount');
 
-        // Calculate profit from individual order items (quantity * (selling_price - buying_price))
-        $selectedMonthGrossProfit = $this->calculateOrderItemsProfit($selectedMonthOrders);
-        $lastMonthGrossProfit = $this->calculateOrderItemsProfit($lastMonthOrders);
+        // Profit should follow payments: sum orders' stored profit (which is based on paid)
+        $selectedMonthGrossProfit = (double) $selectedMonthOrders->sum('profit');
+        $lastMonthGrossProfit = (double) $lastMonthOrders->sum('profit');
 
         // Calculate net profit (gross profit minus expenses)
         $selectedMonthTotalProfit = $selectedMonthGrossProfit - $selectedMonthTotalExpenses;
@@ -87,34 +87,9 @@ class DashboardService
         ];
     }
 
-    private function calculateOrderItemsProfit($orders)
-    {
-        $totalProfit = 0;
-        
-        foreach ($orders as $order) {
-            foreach ($order->orderItems as $orderItem) {
-                $sellingPrice = $orderItem->product_json['selling_price'] ?? 0;
-                $buyingPrice = $orderItem->product_json['buying_price'] ?? 0;
-                $quantity = $orderItem->quantity;
-                
-                // Calculate profit as quantity * (selling_price - buying_price)
-                $itemProfit = $quantity * ($sellingPrice - $buyingPrice);
-                $totalProfit += $itemProfit;
-            }
-        }
-        
-        return $totalProfit;
-    }
-
-    private function calculateNetProfit($orders, $expenses)
-    {
-        $grossProfit = $this->calculateOrderItemsProfit($orders);
-        return $grossProfit - $expenses;
-    }
-
     private function prepareProfitLineChart(): array
     {
-        // Get profit data for the last 7 months from order items minus expenses
+        // Get profit data for the last 7 months based on orders' stored profit minus expenses
         $currentYearProfit = [];
         $lastYearProfit = [];
         
@@ -125,23 +100,19 @@ class DashboardService
             $currentYearOrders = Order::whereMonth('created_at', $carbon->month)
                 ->whereYear('created_at', $carbon->year)
                 ->get();
-            
             $currentYearExpenses = Expense::whereMonth('expense_date', $carbon->month)
                 ->whereYear('expense_date', $carbon->year)
                 ->sum('amount');
-            
-            $currentYearProfit[] = $this->calculateNetProfit($currentYearOrders, $currentYearExpenses);
+            $currentYearProfit[] = (double) $currentYearOrders->sum('profit') - (double) $currentYearExpenses;
             
             // Last year profit
             $lastYearOrders = Order::whereMonth('created_at', $carbon->month)
-                ->whereYear('created_at', $carbon->subYear()->year)
+                ->whereYear('created_at', $carbon->copy()->subYear()->year)
                 ->get();
-            
             $lastYearExpenses = Expense::whereMonth('expense_date', $carbon->month)
-                ->whereYear('expense_date', $carbon->subYear()->year)
+                ->whereYear('expense_date', $carbon->copy()->subYear()->year)
                 ->sum('amount');
-            
-            $lastYearProfit[] = $this->calculateNetProfit($lastYearOrders, $lastYearExpenses);
+            $lastYearProfit[] = (double) $lastYearOrders->sum('profit') - (double) $lastYearExpenses;
         }
 
         // Loop to get the last 7 months

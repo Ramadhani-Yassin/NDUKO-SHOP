@@ -103,13 +103,19 @@ const closeModal = () => {
                 <CardTable
                     indexRoute="categories.index"
                     :paginatedData="categories"
-                    :filters="filters"
+                    :filters="{}"
                     :tableHeads="tableHeads"
                 >
                     <template #cardHeader>
                         <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{categories.total}})</h4>
+                            <h4 class="text-2xl">Categories ({{categories.total}})</h4>
+                            <div class="flex space-x-2">
+                                <a :href="route('categories.index', { export: 'excel' })"
+                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
+                                   Export
+                                </a>
                             <Button @click="createCategoryModal">Create Category</Button>
+                            </div>
                         </div>
                     </template>
 
@@ -143,15 +149,14 @@ const closeModal = () => {
             @submitAction="createCategory"
         >
             <div>
-                <label for="name">Name</label>
+                <label for="name" class="text-stone-600 text-sm font-medium">Name</label>
                 <input
                     id="name"
                     ref="nameInput"
                     v-model="form.name"
-                    @keyup.enter="createCategory"
                     type="text"
                     placeholder="Enter name"
-                    class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:shadow-outline w-full"
+                    class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                 />
                 <InputError :message="form.errors.name"/>
             </div>
@@ -166,15 +171,13 @@ const closeModal = () => {
             @submitAction="updateCategory"
         >
             <div>
-                <label for="name">Name</label>
+                <label for="name" class="text-stone-600 text-sm font-medium">Name</label>
                 <input
                     id="name"
-                    ref="nameInput"
                     v-model="form.name"
-                    @keyup.enter="updateCategory"
                     type="text"
                     placeholder="Enter name"
-                    class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:shadow-outline w-full"
+                    class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
                 />
                 <InputError :message="form.errors.name"/>
             </div>

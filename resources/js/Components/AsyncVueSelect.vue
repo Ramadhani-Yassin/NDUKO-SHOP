@@ -41,7 +41,9 @@ export default {
                 inertia: "disabled",
                 sort_order: "asc"
             };
-            queries[this.resourceLabel] = this.search
+            if (this.search) {
+                queries[this.resourceLabel] = this.search;
+            }
 
             axios.get(route(this.resource, pickBy(queries))).then(({data}) => {
                 this.paginatedData = data;
@@ -53,6 +55,8 @@ export default {
                         ...data.data
                     ];
                 }
+            }).catch(() => {
+                this.options = [];
             });
         },
         async onOpen() {
@@ -90,7 +94,8 @@ export default {
 <template>
     <v-select
         :options="options"
-        :filterable="false"
+        :filterable="true"
+        :clearable="true"
         @open="onOpen"
         @close="onClose"
         @search="(query) => (search = query)"

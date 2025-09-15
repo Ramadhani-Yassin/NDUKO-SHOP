@@ -116,13 +116,19 @@ const closeModal = () => {
                 <CardTable
                     indexRoute="customers.index"
                     :paginatedData="customers"
-                    :filters="filters"
+                    :filters="{}"
                     :tableHeads="tableHeads"
                 >
                     <template #cardHeader>
                         <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{customers.total}})</h4>
+                            <h4 class="text-2xl">Customers ({{customers.total}})</h4>
+                            <div class="flex space-x-2">
+                                <a :href="route('customers.index', { export: 'excel' })"
+                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
+                                   Export
+                                </a>
                             <Button @click="createCustomerModal">Create Customer</Button>
+                            </div>
                         </div>
                     </template>
 
@@ -199,30 +205,8 @@ const closeModal = () => {
                         @keyupEnter="createCustomer"
                     />
                 </div>
-                <!-- Image upload not necessary; commented out. -->
-                <!--
-                <div class="flex flex-col">
-                    <label
-                        class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
-                        <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path
-                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04 .74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
-                        </svg>
-                        <span v-if="form.photo" class="mt-2 text-base leading-normal">{{
-                                form.photo.name.replace(/(^.{17}).*(\..+$)/, "$1...$2")
-                            }}</span>
-                        <span v-else class="mt-2 text-base leading-normal">Select a photo</span>
-                        <input
-                            @input="form.photo = $event.target.files[0]"
-                            type='file'
-                            class="hidden"
-                            accept="image/png, image/jpeg, image/jpg, image/gif, image/svg"
-                        />
-                    </label>
-                    <InputError :message="form.errors.photo"/>
                 </div>
-                -->
-                <div class="flex flex-col">
+            <div class="mt-2">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea
                         id="address"
@@ -234,6 +218,10 @@ const closeModal = () => {
                     ></textarea>
                     <InputError :message="form.errors.address"/>
                 </div>
+            <div class="mt-2">
+                <label for="photo" class="text-stone-600 text-sm font-medium">Photo</label>
+                <input id="photo" name="photo" type="file" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
+                <InputError :message="form.errors.photo"/>
             </div>
         </Modal>
 
@@ -277,30 +265,8 @@ const closeModal = () => {
                         @keyupEnter="createCustomer"
                     />
                 </div>
-                <!-- Image upload not necessary; commented out. -->
-                <!--
-                <div class="flex flex-col">
-                    <label
-                        class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
-                        <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path
-                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
-                        </svg>
-                        <span v-if="form.photo" class="mt-2 text-base leading-normal">{{
-                                form.photo.name.replace(/(^.{17}).*(\..+$)/, "$1...$2")
-                            }}</span>
-                        <span v-else class="mt-2 text-base leading-normal">Select a photo</span>
-                        <input
-                            @input="form.photo = $event.target.files[0]"
-                            type='file'
-                            class="hidden"
-                            accept="image/png, image/jpeg, image/jpg, image/gif, image/svg"
-                        />
-                    </label>
-                    <InputError :message="form.errors.photo"/>
                 </div>
-                -->
-                <div class="flex flex-col">
+            <div class="mt-2">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
                     <textarea
                         id="address"
@@ -312,6 +278,10 @@ const closeModal = () => {
                     ></textarea>
                     <InputError :message="form.errors.address"/>
                 </div>
+            <div class="mt-2">
+                <label for="photo" class="text-stone-600 text-sm font-medium">Photo</label>
+                <input id="photo" name="photo" type="file" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
+                <InputError :message="form.errors.photo"/>
             </div>
         </Modal>
 

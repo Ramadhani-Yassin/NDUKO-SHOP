@@ -118,13 +118,19 @@ const closeModal = () => {
                 <CardTable
                     indexRoute="suppliers.index"
                     :paginatedData="suppliers"
-                    :filters="filters"
+                    :filters="{}"
                     :tableHeads="tableHeads"
                 >
                     <template #cardHeader>
                         <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{suppliers.total}})</h4>
+                            <h4 class="text-2xl">Suppliers ({{suppliers.total}})</h4>
+                            <div class="flex space-x-2">
+                                <a :href="route('suppliers.index', { export: 'excel' })"
+                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
+                                   Export
+                                </a>
                             <Button @click="createSupplierModal">Create Supplier</Button>
+                            </div>
                         </div>
                     </template>
 
@@ -173,87 +179,35 @@ const closeModal = () => {
             <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 <div class="flex flex-col">
                     <label for="name" class="text-stone-600 text-sm font-medium">Name</label>
-                    <input
-                        id="name"
-                        ref="nameInput"
-                        v-model="form.name"
-                        @keyup.enter="createSupplier"
-                        type="text"
-                        placeholder="Enter name"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="name" ref="nameInput" v-model="form.name" type="text" placeholder="Enter name" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.name"/>
                 </div>
                 <div class="flex flex-col">
                     <label for="email" class="text-stone-600 text-sm font-medium">Email</label>
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        @keyup.enter="createSupplier"
-                        type="email"
-                        placeholder="Enter email"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="email" v-model="form.email" type="email" placeholder="Enter email" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.email"/>
                 </div>
                 <div class="flex flex-col">
                     <label for="phone" class="text-stone-600 text-sm font-medium">Phone</label>
-                    <input
-                        id="phone"
-                        v-model="form.phone"
-                        @keyup.enter="createSupplier"
-                        type="text"
-                        placeholder="Enter phone"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="phone" v-model="form.phone" type="text" placeholder="Enter phone" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.phone"/>
                 </div>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 <div class="flex flex-col">
                     <label for="shop_name" class="text-stone-600 text-sm font-medium">Shop Name</label>
-                    <input
-                        id="shop_name"
-                        v-model="form.shop_name"
-                        @keyup.enter="createSupplier"
-                        type="text"
-                        placeholder="Enter shop name"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="shop_name" v-model="form.shop_name" type="text" placeholder="Enter shop name" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.shop_name"/>
                 </div>
-                <!-- Image upload not necessary; commented out. -->
-                <!--
-                <div class="flex flex-col">
-                    <label
-                        class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
-                        <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path
-                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
-                        </svg>
-                        <span v-if="form.photo" class="mt-2 text-base leading-normal">{{
-                                form.photo.name.replace(/(^.{17}).*(\..+$)/, "$1...$2")
-                            }}</span>
-                        <span v-else class="mt-2 text-base leading-normal">Select a photo</span>
-                        <input
-                            @input="form.photo = $event.target.files[0]"
-                            type='file'
-                            class="hidden"
-                            accept="image/png, image/jpeg, image/jpg, image/gif, image/svg"
-                        />
-                    </label>
-                    <InputError :message="form.errors.photo"/>
-                </div>
-                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
-                    <textarea
-                        id="address"
-                        v-model="form.address"
-                        type="text"
-                        rows="3"
-                        placeholder="Enter address"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    ></textarea>
+                    <input id="address" v-model="form.address" type="text" placeholder="Enter address" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.address"/>
+                </div>
+                <div class="flex flex-col">
+                    <label for="photo" class="text-stone-600 text-sm font-medium">Photo</label>
+                    <input id="photo" name="photo" type="file" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
+                    <InputError :message="form.errors.photo"/>
                 </div>
             </div>
         </Modal>
@@ -269,87 +223,35 @@ const closeModal = () => {
             <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 <div class="flex flex-col">
                     <label for="name" class="text-stone-600 text-sm font-medium">Name</label>
-                    <input
-                        id="name"
-                        ref="nameInput"
-                        v-model="form.name"
-                        @keyup.enter="updateSupplier"
-                        type="text"
-                        placeholder="Enter name"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="name" ref="nameInput" v-model="form.name" type="text" placeholder="Enter name" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.name"/>
                 </div>
                 <div class="flex flex-col">
                     <label for="email" class="text-stone-600 text-sm font-medium">Email</label>
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        @keyup.enter="updateSupplier"
-                        type="email"
-                        placeholder="Enter email"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="email" v-model="form.email" type="email" placeholder="Enter email" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.email"/>
                 </div>
                 <div class="flex flex-col">
                     <label for="phone" class="text-stone-600 text-sm font-medium">Phone</label>
-                    <input
-                        id="phone"
-                        v-model="form.phone"
-                        @keyup.enter="updateSupplier"
-                        type="text"
-                        placeholder="Enter phone"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="phone" v-model="form.phone" type="text" placeholder="Enter phone" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.phone"/>
                 </div>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 <div class="flex flex-col">
                     <label for="shop_name" class="text-stone-600 text-sm font-medium">Shop Name</label>
-                    <input
-                        id="shop_name"
-                        v-model="form.shop_name"
-                        @keyup.enter="updateSupplier"
-                        type="text"
-                        placeholder="Enter shop name"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    />
+                    <input id="shop_name" v-model="form.shop_name" type="text" placeholder="Enter shop name" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.shop_name"/>
                 </div>
-                <!-- Image upload not necessary; commented out. -->
-                <!--
-                <div class="flex flex-col">
-                    <label
-                        class="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-emerald-600">
-                        <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path
-                                d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
-                        </svg>
-                        <span v-if="form.photo" class="mt-2 text-base leading-normal">{{
-                                form.photo.name.replace(/(^.{17}).*(\..+$)/, "$1...$2")
-                            }}</span>
-                        <span v-else class="mt-2 text-base leading-normal">Select a photo</span>
-                        <input
-                            @input="form.photo = $event.target.files[0]"
-                            type='file'
-                            class="hidden"
-                            accept="image/png, image/jpeg, image/jpg, image/gif, image/svg"
-                        />
-                    </label>
-                    <InputError :message="form.errors.photo"/>
-                </div>
-                -->
                 <div class="flex flex-col">
                     <label for="address" class="text-stone-600 text-sm font-medium">Address</label>
-                    <textarea
-                        id="address"
-                        v-model="form.address"
-                        type="text"
-                        rows="3"
-                        placeholder="Enter address"
-                        class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"
-                    ></textarea>
+                    <input id="address" v-model="form.address" type="text" placeholder="Enter address" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.address"/>
+                </div>
+                <div class="flex flex-col">
+                    <label for="photo" class="text-stone-600 text-sm font-medium">Photo</label>
+                    <input id="photo" name="photo" type="file" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
+                    <InputError :message="form.errors.photo"/>
                 </div>
             </div>
         </Modal>

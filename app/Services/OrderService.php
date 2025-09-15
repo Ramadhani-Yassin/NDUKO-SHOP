@@ -377,4 +377,43 @@ class OrderService
         }
         return $status;
     }
+
+    /**
+     * @param int $id
+     * @return Order
+     * @throws OrderNotFoundException
+     * @throws Exception
+     */
+    public function cancel(int $id): Order
+    {
+        $order = $this->findByIdOrFail(id: $id, expands: [OrderExpandEnum::ORDER_ITEMS->value]);
+
+        // If already cancelled, return as-is
+        if ($order->status === OrderStatusEnum::CANCELLED->value) {
+            return $order;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Reverse any paid and profit/loss to zero; mark due equals total
+            $processPayload = [
+                OrderFieldsEnum::PAID->value    => 0,
+                OrderFieldsEnum::DUE->value     => $order->total,
+                OrderFieldsEnum::PROFIT->value  => 0,
+                OrderFieldsEnum::LOSS->value    => 0,
+                OrderFieldsEnum::STATUS->value  => OrderStatusEnum::CANCELLED->value,
+            ];
+
+            // Optionally, we could also restock items; skipping to maintain existing behavior unless requested
+            $order = $this->repository->update($order, $processPayload);
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $order;
+    }
 }

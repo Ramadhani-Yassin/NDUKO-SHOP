@@ -13,10 +13,12 @@ use App\Http\Requests\Category\CategoryIndexRequest;
 use App\Http\Requests\Category\CategoryUpdateRequest;
 use App\Services\CategoryService;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CategoryController extends Controller
 {
@@ -24,12 +26,37 @@ class CategoryController extends Controller
     {
     }
 
-    public function index(CategoryIndexRequest $request)
+    public function index(CategoryIndexRequest $request): LengthAwarePaginator|Response|StreamedResponse
     {
         if ($request->inertia == "disabled") {
             $query = $request->validated();
             $query["sort_by"] = CategorySortFieldsEnum::NAME->value;
             return $this->service->getAll($query);
+        }
+
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'categories_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['#', 'Name']);
+                $i = 1;
+                foreach ($rows as $c) {
+                    fputcsv($out, [
+                        $i++,
+                        $c->name,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
         }
 
         return Inertia::render(

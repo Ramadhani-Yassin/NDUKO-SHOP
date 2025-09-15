@@ -17,7 +17,7 @@ enum TransactionPaidThroughEnum: string implements BaseEnumInterface
     {
         return [
             self::CASH->value => "Cash",
-            self::BANK->value => "Bank",
+            self::BANK->value => "Lipa Namba",
             self::LOAN->value => "Loan",
         ];
     }

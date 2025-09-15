@@ -69,18 +69,24 @@ const closeModal = () => {
                 <CardTable
                     indexRoute="products.index"
                     :paginatedData="products"
-                    :filters="filters"
+                    :filters="{}"
                     :tableHeads="tableHeads"
                 >
                     <template #cardHeader>
                         <div class="flex justify-between items-center">
-                            <h4 class="text-2xl">Apply filters({{products.total}})</h4>
+                            <h4 class="text-2xl">Products ({{products.total}})</h4>
+                            <div class="flex space-x-2">
+                                <a :href="route('products.index', { export: 'excel' })"
+                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
+                                   Export
+                                </a>
                             <Button
                                 :href="route('products.create')"
                                 buttonType="link"
                             >
                                 Create Product
                             </Button>
+                            </div>
                         </div>
                     </template>
 

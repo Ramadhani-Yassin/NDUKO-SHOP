@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployeeController extends Controller
 {
@@ -24,8 +25,38 @@ class EmployeeController extends Controller
     {
     }
 
-    public function index(EmployeeIndexRequest $request)
+    public function index(EmployeeIndexRequest $request): Response|StreamedResponse
     {
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'employees_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['#', 'Name', 'Designation', 'Email', 'Phone', 'Salary', 'Joining Date']);
+                $i = 1;
+                foreach ($rows as $e) {
+                    fputcsv($out, [
+                        $i++,
+                        $e->name,
+                        $e->designation,
+                        $e->email,
+                        $e->phone,
+                        $e->salary,
+                        $e->joining_date,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
+
         if ($request->inertia == "disabled"){
             $query = $request->validated();
             $query["sort_by"] = EmployeeSortFieldsEnum::NAME->value;

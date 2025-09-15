@@ -1,0 +1,4 @@
+zip -r ../ndk-app.zip . -x "node_modules/*" ".git/*" "tests/*" "vendor/*"
+zip -r ../vendor.zip vendor
+
+npm run build

@@ -23,6 +23,8 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
@@ -30,8 +32,42 @@ class OrderController extends Controller
     {
     }
 
-    public function index(OrderIndexRequest $request)
+    public function index(OrderIndexRequest $request): Response|StreamedResponse
     {
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'orders_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['Order Number', 'Customer', 'Sub Total', 'Tax', 'Discount', 'Total', 'Paid', 'Due', 'Profit', 'Loss', 'Status', 'Created At']);
+                foreach ($rows as $o) {
+                    fputcsv($out, [
+                        $o->order_number,
+                        $o->customer?->name,
+                        $o->sub_total,
+                        $o->tax_total,
+                        $o->discount_total,
+                        $o->total,
+                        $o->paid,
+                        $o->due,
+                        $o->profit,
+                        $o->loss,
+                        $o->status,
+                        $o->created_at,
+                    ]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
+
         $params = $request->validated();
         if ($request->inertia == "disabled"){
             return $this->service->getAll($params);
@@ -215,6 +251,39 @@ class OrderController extends Controller
             ];
 
             Log::error("Order payment failed", [
+                "message" => $e->getMessage(),
+                "traces"  => $e->getTrace()
+            ]);
+        }
+
+        return redirect()
+            ->route('orders.index')
+            ->with('flash', $flash);
+    }
+
+    /**
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function cancel(int $id): RedirectResponse
+    {
+        try {
+            $this->service->cancel(id: $id);
+            $flash = [
+                "message" => 'Order cancelled successfully.'
+            ];
+        } catch (OrderNotFoundException $e) {
+            $flash = [
+                "isSuccess" => false,
+                "message"   => $e->getMessage(),
+            ];
+        } catch (Exception $e) {
+            $flash = [
+                "isSuccess" => false,
+                "message"   => "Order cancellation failed!",
+            ];
+
+            Log::error("Order cancellation failed", [
                 "message" => $e->getMessage(),
                 "traces"  => $e->getTrace()
             ]);

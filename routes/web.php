@@ -74,9 +74,11 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('orders', OrderController::class);
     Route::put('orders/{order}/settle', [OrderController::class, 'settle'])->name('orders.settle');
     Route::put('orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+    Route::put('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     // Safe POST fallbacks for hosting
     Route::post('orders/{order}/settle', [OrderController::class, 'settle'])->name('orders.settle');
     Route::post('orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+    Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
     // Transaction
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');

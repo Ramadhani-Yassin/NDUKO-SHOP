@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExpenseController extends Controller
 {
@@ -24,8 +25,29 @@ class ExpenseController extends Controller
     {
     }
 
-    public function index(ExpenseIndexRequest $request): Response
+    public function index(ExpenseIndexRequest $request): Response|StreamedResponse
     {
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+            $filename = 'expenses_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
+            return response()->stream(function () use ($rows) {
+                $out = fopen('php://output', 'w');
+                fputcsv($out, ['ID', 'Name', 'Amount', 'Expense Date', 'Description']);
+                foreach ($rows as $e) {
+                    fputcsv($out, [$e->id, $e->name, $e->amount, $e->expense_date, $e->description]);
+                }
+                fclose($out);
+            }, 200, $headers);
+        }
+
         return Inertia::render(
             component: 'Expense/Index',
             props: [

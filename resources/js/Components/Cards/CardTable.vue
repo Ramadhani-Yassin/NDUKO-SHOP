@@ -95,13 +95,6 @@
                         </div>
 
                         <div class="flex flex-col justify-end">
-                            <div>
-                                <button
-                                    @click="reset"
-                                    class="active:scale-95 rounded-lg bg-gray-200 px-8 py-2 font-medium text-gray-600 outline-none focus:ring hover:opacity-90">
-                                    Reset
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
