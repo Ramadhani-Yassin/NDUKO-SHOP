@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf; // added
 
 class CustomerController extends Controller
 {
@@ -26,7 +27,7 @@ class CustomerController extends Controller
     {
     }
 
-    public function index(CustomerIndexRequest $request): LengthAwarePaginator|Response|StreamedResponse
+    public function index(CustomerIndexRequest $request): LengthAwarePaginator|Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->filled('export')) {
             $page = $this->service->getAll([
@@ -34,6 +35,28 @@ class CustomerController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Name', 'Email', 'Phone'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $c) {
+                    $dataRows[] = [
+                        $i++,
+                        $c->name,
+                        $c->email,
+                        $c->phone,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Customers',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'portrait');
+                $filename = 'customers_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'customers_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
@@ -173,21 +196,11 @@ class CustomerController extends Controller
             $flash = [
                 "message" => 'Customer deleted successfully.'
             ];
-        } catch (CustomerNotFoundException $e) {
-            $flash = [
-                "isSuccess" => false,
-                "message"   => $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $flash = [
                 "isSuccess" => false,
                 "message"   => "Customer deletion failed!",
             ];
-
-            Log::error("Customer deletion failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()

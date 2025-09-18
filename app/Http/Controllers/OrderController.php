@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -32,7 +33,7 @@ class OrderController extends Controller
     {
     }
 
-    public function index(OrderIndexRequest $request): Response|StreamedResponse
+    public function index(OrderIndexRequest $request): Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->filled('export')) {
             $page = $this->service->getAll([
@@ -40,6 +41,35 @@ class OrderController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['Order Number', 'Customer', 'Sub Total', 'Tax', 'Discount', 'Total', 'Paid', 'Due', 'Profit', 'Loss', 'Status', 'Created At'];
+                $dataRows = [];
+                foreach ($rows as $o) {
+                    $dataRows[] = [
+                        $o->order_number,
+                        $o->customer?->name,
+                        $o->sub_total,
+                        $o->tax_total,
+                        $o->discount_total,
+                        $o->total,
+                        $o->paid,
+                        $o->due,
+                        $o->profit,
+                        $o->loss,
+                        $o->status,
+                        $o->created_at,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Orders',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'landscape');
+                $filename = 'orders_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'orders_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',

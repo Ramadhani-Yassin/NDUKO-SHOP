@@ -6,6 +6,7 @@ import TableData from "@/Components/TableData.vue";
 import Button from "@/Components/Button.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
+import ExportModal from "@/Components/ExportModal.vue";
 
 defineProps({
     filters: {
@@ -24,6 +25,7 @@ const selectedUnitType = ref(null);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
+const showExportModal = ref(false);
 const nameInput = ref(null);
 const tableHeads = ref(['#', "Name", "Symbol", "Action"]);
 
@@ -112,14 +114,19 @@ const closeModal = () => {
                         <div class="flex justify-between items-center">
                             <h4 class="text-2xl">Unit Types ({{unitTypes.total}})</h4>
                             <div class="flex space-x-2">
-                                <a :href="route('unit-types.index', { export: 'excel' })"
-                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
-                                   Export
-                                </a>
+                                <Button @click="showExportModal = true" type="gray" title="Export">
+                                 <i class="fa fa-file-export"></i>
+                                </Button>
                             <Button @click="createUnitTypeModal">Create UnitType</Button>
                             </div>
                         </div>
                     </template>
+
+                    <ExportModal
+                        :show="showExportModal"
+                        indexRoute="unit-types.index"
+                        @close="showExportModal = false"
+                    />
 
                     <tr v-for="(unitType, index) in unitTypes.data" :key="unitType.id">
                         <TableData>

@@ -6,6 +6,7 @@ import TableData from "@/Components/TableData.vue";
 import Button from "@/Components/Button.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
+import ExportModal from "@/Components/ExportModal.vue";
 import {useForm} from '@inertiajs/vue3';
 import {nextTick, ref} from 'vue';
 import {showToast} from "@/Utils/Helper.js";
@@ -23,6 +24,7 @@ const selectedSupplier = ref(null);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
+const showExportModal = ref(false);
 const nameInput = ref(null);
 const tableHeads = ref(['#', "Name", "Email", "Phone", "Shop Name", "Action"]);
 
@@ -125,14 +127,19 @@ const closeModal = () => {
                         <div class="flex justify-between items-center">
                             <h4 class="text-2xl">Suppliers ({{suppliers.total}})</h4>
                             <div class="flex space-x-2">
-                                <a :href="route('suppliers.index', { export: 'excel' })"
-                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
-                                   Export
-                                </a>
+                                <Button @click="showExportModal = true" type="gray" title="Export">
+                                 <i class="fa fa-file-export"></i>
+                                </Button>
                             <Button @click="createSupplierModal">Create Supplier</Button>
                             </div>
                         </div>
                     </template>
+
+                    <ExportModal
+                        :show="showExportModal"
+                        indexRoute="suppliers.index"
+                        @close="showExportModal = false"
+                    />
 
                     <tr v-for="(supplier, index) in suppliers.data" :key="supplier.id">
                         <TableData>
@@ -204,11 +211,13 @@ const closeModal = () => {
                     <input id="address" v-model="form.address" type="text" placeholder="Enter address" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.address"/>
                 </div>
+                <!--
                 <div class="flex flex-col">
                     <label for="photo" class="text-stone-600 text-sm font-medium">Photo</label>
                     <input id="photo" name="photo" type="file" class="mt-2 block w-full rounded-md border border-gray-200 px-2 py-2 shadow-sm outline-none focus:outline-none focus:shadow-outline"/>
                     <InputError :message="form.errors.photo"/>
                 </div>
+                -->
             </div>
         </Modal>
 

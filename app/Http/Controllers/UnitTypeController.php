@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf; // added
 
 class UnitTypeController extends Controller
 {
@@ -26,7 +27,7 @@ class UnitTypeController extends Controller
     {
     }
 
-    public function index(UnitTypeIndexRequest $request): LengthAwarePaginator|Response|StreamedResponse
+    public function index(UnitTypeIndexRequest $request): LengthAwarePaginator|Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->inertia == "disabled") {
             $query = $request->validated();
@@ -40,6 +41,27 @@ class UnitTypeController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Name', 'Symbol'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $u) {
+                    $dataRows[] = [
+                        $i++,
+                        $u->name,
+                        $u->symbol,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Unit Types',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'portrait');
+                $filename = 'unit_types_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'unit_types_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
@@ -160,21 +182,11 @@ class UnitTypeController extends Controller
             $flash = [
                 "message" => 'Unit type deleted successfully.'
             ];
-        } catch (UnitTypeNotFoundException $e) {
-            $flash = [
-                "isSuccess" => false,
-                "message"   => $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $flash = [
                 "isSuccess" => false,
                 "message"   => "Unit type deletion failed!",
             ];
-
-            Log::error("Unit type deletion failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()

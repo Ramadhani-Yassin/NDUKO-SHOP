@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Barryvdh\DomPDF\Facade\Pdf; // added
 
 class SupplierController extends Controller
 {
@@ -24,8 +25,38 @@ class SupplierController extends Controller
     {
     }
 
-    public function index(SupplierIndexRequest $request): LengthAwarePaginator|Response
+    public function index(SupplierIndexRequest $request): LengthAwarePaginator|Response|\Illuminate\Http\Response
     {
+        if ($request->filled('export')) {
+            $page = $this->service->getAll([
+                ...$request->validated(),
+                'per_page' => 100000,
+            ]);
+            $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Name', 'Email', 'Phone', 'Shop Name'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $s) {
+                    $dataRows[] = [
+                        $i++,
+                        $s->name,
+                        $s->email,
+                        $s->phone,
+                        $s->shop_name,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Suppliers',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'portrait');
+                $filename = 'suppliers_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+        }
+
         if ($request->inertia == "disabled"){
             $query = $request->validated();
             $query["sort_by"] = SupplierSortFieldsEnum::NAME->value;
@@ -125,11 +156,6 @@ class SupplierController extends Controller
                 "isSuccess" => false,
                 "message"   => "Supplier update failed!",
             ];
-
-            Log::error("Supplier update failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()
@@ -144,21 +170,11 @@ class SupplierController extends Controller
             $flash = [
                 "message" => 'Supplier deleted successfully.'
             ];
-        } catch (SupplierNotFoundException $e) {
-            $flash = [
-                "isSuccess" => false,
-                "message"   => $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $flash = [
                 "isSuccess" => false,
                 "message"   => "Supplier deletion failed!",
             ];
-
-            Log::error("Supplier deletion failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()

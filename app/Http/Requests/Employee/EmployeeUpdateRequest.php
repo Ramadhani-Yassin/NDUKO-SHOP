@@ -35,7 +35,7 @@ class EmployeeUpdateRequest extends FormRequest
             EmployeeFieldsEnum::DESIGNATION->value  => ["nullable", "string", "max:255"],
             EmployeeFieldsEnum::ADDRESS->value      => ["required", "string"],
             EmployeeFieldsEnum::SALARY->value       => ["required", "numeric"],
-            EmployeeFieldsEnum::PHOTO->value        => ["nullable", "file", "mimes:jpg,jpeg,png,gif,svg", "max:1024"],
+            EmployeeFieldsEnum::PHOTO->value        => ["nullable"],
             EmployeeFieldsEnum::NID->value          => ["nullable", "string", "max:255"],
             EmployeeFieldsEnum::JOINING_DATE->value => ["required", "date", "max:255"],
         ];

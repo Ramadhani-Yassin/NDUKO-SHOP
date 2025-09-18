@@ -6,6 +6,7 @@ import TableData from "@/Components/TableData.vue";
 import Button from "@/Components/Button.vue";
 import InputError from "@/Components/InputError.vue";
 import Modal from "@/Components/Modal.vue";
+import ExportModal from "@/Components/ExportModal.vue";
 import {useForm} from '@inertiajs/vue3';
 import {nextTick, ref} from 'vue';
 import DashboardInputGroup from "@/Components/DashboardInputGroup.vue";
@@ -24,6 +25,7 @@ const selectedEmployee = ref(null);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
+const showExportModal = ref(false);
 const nameInput = ref(null);
 const tableHeads = ref(['#', "Name", "Designation", "Email", "Phone", "Salary", "Joining Date", "Action"]);
 
@@ -132,14 +134,19 @@ const closeModal = () => {
                         <div class="flex justify-between items-center">
                             <h4 class="text-2xl">Employees ({{employees.total}})</h4>
                             <div class="flex space-x-2">
-                                <a :href="route('employees.index', { export: 'excel' })"
-                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
-                                   Export
-                                </a>
+                                <Button @click="showExportModal = true" type="gray" title="Export">
+                                 <i class="fa fa-file-export"></i>
+                                </Button>
                             <Button @click="createEmployeeModal">Create Employee</Button>
                             </div>
                         </div>
                     </template>
+
+                    <ExportModal
+                        :show="showExportModal"
+                        indexRoute="employees.index"
+                        @close="showExportModal = false"
+                    />
 
                     <tr v-for="(employee, index) in employees.data" :key="employee.id">
                         <TableData>
@@ -273,6 +280,8 @@ const closeModal = () => {
                         @keyupEnter="createEmployee"
                     />
                 </div>
+                
+                <!--
                 <div class="flex flex-col">
                     <DashboardInputGroup
                         label="Photo"
@@ -284,6 +293,8 @@ const closeModal = () => {
                         type="file"
                     />
                 </div>
+                -->
+
             </div>
         </Modal>
 
@@ -383,6 +394,9 @@ const closeModal = () => {
                         @keyupEnter="createEmployee"
                     />
                 </div>
+
+                
+                <!--
                 <div class="flex flex-col">
                     <DashboardInputGroup
                         label="Photo"
@@ -394,6 +408,8 @@ const closeModal = () => {
                         type="file"
                     />
                 </div>
+                -->
+
             </div>
         </Modal>
 

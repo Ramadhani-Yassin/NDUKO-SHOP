@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf; // added
 
 class EmployeeController extends Controller
 {
@@ -25,7 +26,7 @@ class EmployeeController extends Controller
     {
     }
 
-    public function index(EmployeeIndexRequest $request): Response|StreamedResponse
+    public function index(EmployeeIndexRequest $request): Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->filled('export')) {
             $page = $this->service->getAll([
@@ -33,6 +34,31 @@ class EmployeeController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Name', 'Designation', 'Email', 'Phone', 'Salary', 'Joining Date'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $e) {
+                    $dataRows[] = [
+                        $i++,
+                        $e->name,
+                        $e->designation,
+                        $e->email,
+                        $e->phone,
+                        $e->salary,
+                        $e->joining_date,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Employees',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'portrait');
+                $filename = 'employees_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'employees_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
@@ -193,21 +219,11 @@ class EmployeeController extends Controller
             $flash = [
                 "message" => 'Employee deleted successfully.'
             ];
-        } catch (EmployeeNotFoundException $e) {
-            $flash = [
-                "isSuccess" => false,
-                "message"   => $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $flash = [
                 "isSuccess" => false,
                 "message"   => "Employee deletion failed!",
             ];
-
-            Log::error("Employee deletion failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()

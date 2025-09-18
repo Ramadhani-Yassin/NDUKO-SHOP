@@ -16,6 +16,7 @@ use App\Services\TransactionService;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -23,7 +24,7 @@ class TransactionController extends Controller
     {
     }
 
-    public function index(TransactionIndexRequest $request): Response|StreamedResponse
+    public function index(TransactionIndexRequest $request): Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->filled('export')) {
             $page = $this->service->getAll([
@@ -31,6 +32,30 @@ class TransactionController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Transaction Number', 'Order Number', 'Amount', 'Paid Through', 'Created At'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $t) {
+                    $dataRows[] = [
+                        $i++,
+                        $t->transaction_number,
+                        $t->order?->order_number,
+                        $t->amount,
+                        $t->paid_through,
+                        $t->created_at,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Transactions',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'portrait');
+                $filename = 'transactions_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'transactions_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',

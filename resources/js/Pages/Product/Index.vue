@@ -5,6 +5,7 @@ import CardTable from "@/Components/Cards/CardTable.vue";
 import TableData from "@/Components/TableData.vue";
 import Button from "@/Components/Button.vue";
 import Modal from "@/Components/Modal.vue";
+import ExportModal from "@/Components/ExportModal.vue";
 import {useForm} from '@inertiajs/vue3';
 import {ref} from 'vue';
 import {numberFormat, showToast, truncateString} from "@/Utils/Helper.js";
@@ -22,6 +23,7 @@ const selectedProduct = ref(null);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
+const showExportModal = ref(false);
 const tableHeads = ref(['#', "Name", "Product Number", "Product Code", "Category", "Supplier", "Quantity", "Status", "Action"]);
 
 const form = useForm({
@@ -76,10 +78,9 @@ const closeModal = () => {
                         <div class="flex justify-between items-center">
                             <h4 class="text-2xl">Products ({{products.total}})</h4>
                             <div class="flex space-x-2">
-                                <a :href="route('products.index', { export: 'excel' })"
-                                   class="active:scale-95 rounded bg-gray-700 px-4 py-2 text-white text-xs font-bold uppercase shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150">
-                                   Export
-                                </a>
+                                <Button @click="showExportModal = true" type="gray" title="Export">
+                                    <i class="fa fa-file-export"></i>
+                                </Button>
                             <Button
                                 :href="route('products.create')"
                                 buttonType="link"
@@ -89,6 +90,12 @@ const closeModal = () => {
                             </div>
                         </div>
                     </template>
+
+                    <ExportModal
+                        :show="showExportModal"
+                        indexRoute="products.index"
+                        @close="showExportModal = false"
+                    />
 
                     <tr v-for="(product, index) in products.data" :key="product.id">
                         <TableData>

@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf; // added
 
 class ProductController extends Controller
 {
@@ -32,7 +33,7 @@ class ProductController extends Controller
     {
     }
 
-    public function index(ProductIndexRequest $request): Response|StreamedResponse
+    public function index(ProductIndexRequest $request): Response|StreamedResponse|\Illuminate\Http\Response
     {
         if ($request->filled('export')) {
             $params = $request->validated();
@@ -46,6 +47,33 @@ class ProductController extends Controller
                 'per_page' => 100000,
             ]);
             $rows = $page->items();
+
+            if ($request->export === 'pdf') {
+                $headers = ['#', 'Name', 'Product Number', 'Product Code', 'Category', 'Supplier', 'Quantity', 'Unit', 'Status'];
+                $i = 1;
+                $dataRows = [];
+                foreach ($rows as $p) {
+                    $dataRows[] = [
+                        $i++,
+                        $p->name,
+                        $p->product_number,
+                        $p->product_code,
+                        $p->category?->name,
+                        $p->supplier?->name,
+                        $p->quantity,
+                        $p->unitType?->symbol,
+                        $p->status,
+                    ];
+                }
+                $pdf = Pdf::loadView('pdf.table', [
+                    'title'   => 'Products',
+                    'headers' => $headers,
+                    'rows'    => $dataRows,
+                ])->setPaper('a4', 'landscape');
+                $filename = 'products_' . now()->format('Ymd_His') . '.pdf';
+                return $pdf->download($filename);
+            }
+
             $filename = 'products_' . now()->format('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
@@ -64,7 +92,7 @@ class ProductController extends Controller
                         $p->category?->name,
                         $p->supplier?->name,
                         $p->quantity,
-                        $p->unit_type?->symbol,
+                        $p->unitType?->symbol,
                         $p->status,
                     ]);
                 }
@@ -269,21 +297,11 @@ class ProductController extends Controller
             $flash = [
                 "message" => 'Product deleted successfully.'
             ];
-        } catch (ProductNotFoundException $e) {
-            $flash = [
-                "isSuccess" => false,
-                "message"   => $e->getMessage(),
-            ];
         } catch (Exception $e) {
             $flash = [
                 "isSuccess" => false,
                 "message"   => "Product deletion failed!",
             ];
-
-            Log::error("Product deletion failed!", [
-                "message" => $e->getMessage(),
-                "traces"  => $e->getTrace()
-            ]);
         }
 
         return redirect()
