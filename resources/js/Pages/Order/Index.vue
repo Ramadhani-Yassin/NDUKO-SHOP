@@ -109,7 +109,7 @@ const closeModal = () => {
                             <h4 class="text-2xl">Orders ({{orders.total}})</h4>
                             <div class="flex space-x-2">
                                 <Button @click="showExportModal = true" type="gray" title="Export">
-                                 <i class="fa fa-file-export"></i>
+                                 <i class="fa fa-download"></i>
                                 </Button>
                                 <Button
                                     :href="route('carts.index')"
